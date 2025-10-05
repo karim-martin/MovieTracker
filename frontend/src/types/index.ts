@@ -14,6 +14,11 @@ export interface Movie {
   releaseYear: number;
   plot?: string;
   posterUrl?: string;
+  backdropUrl?: string;
+  rating?: number;
+  voteCount?: number;
+  tmdbId?: number;
+  source?: 'tmdb' | 'local';
   genres?: MovieGenre[];
   externalRatings?: ExternalRating[];
   credits?: Credit[];

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middlewares/auth';
+import { tmdbService } from '../services/tmdbService';
 
 const prisma = new PrismaClient();
 
@@ -84,20 +85,63 @@ export const createMovie = async (req: AuthRequest, res: Response): Promise<void
 
 export const getAllMovies = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { title, genre, person, page = '1', limit = '10' } = req.query;
-
+    const { title, genre, source = 'tmdb', page = '1' } = req.query;
     const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
+
+    // If searching by title or source is TMDB, fetch from TMDB
+    if (source === 'tmdb' || title) {
+      let tmdbResults;
+
+      if (title) {
+        // Search TMDB by title
+        tmdbResults = await tmdbService.searchMovies(title as string, pageNum);
+      } else if (genre) {
+        // Get TMDB genres first, find matching genre ID
+        const genres = await tmdbService.getGenres();
+        const matchedGenre = genres.find(g =>
+          g.name.toLowerCase().includes((genre as string).toLowerCase())
+        );
+
+        if (matchedGenre) {
+          tmdbResults = await tmdbService.discoverByGenre(matchedGenre.id, pageNum);
+        } else {
+          tmdbResults = await tmdbService.getPopularMovies(pageNum);
+        }
+      } else {
+        // Get popular movies by default
+        tmdbResults = await tmdbService.getPopularMovies(pageNum);
+      }
+
+      // Format TMDB results with image URLs
+      const movies = tmdbResults.results.map((movie) => ({
+        id: movie.id.toString(),
+        tmdbId: movie.id,
+        title: movie.title,
+        releaseYear: new Date(movie.release_date).getFullYear(),
+        plot: movie.overview,
+        posterUrl: tmdbService.getPosterUrl(movie.poster_path),
+        backdropUrl: tmdbService.getBackdropUrl(movie.backdrop_path),
+        rating: movie.vote_average,
+        voteCount: movie.vote_count,
+        source: 'tmdb' as const,
+      }));
+
+      return res.status(200).json({
+        movies,
+        pagination: {
+          total: tmdbResults.total_results,
+          page: pageNum,
+          totalPages: tmdbResults.total_pages,
+        },
+        source: 'tmdb',
+      });
+    }
+
+    // Otherwise, fetch from local database
+    const limitNum = 20;
     const skip = (pageNum - 1) * limitNum;
 
     const where: any = {};
-
-    if (title) {
-      where.title = {
-        contains: title as string,
-        mode: 'insensitive',
-      };
-    }
 
     if (genre) {
       where.genres = {
@@ -105,19 +149,6 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<voi
           genre: {
             name: {
               contains: genre as string,
-              mode: 'insensitive',
-            },
-          },
-        },
-      };
-    }
-
-    if (person) {
-      where.credits = {
-        some: {
-          person: {
-            name: {
-              contains: person as string,
               mode: 'insensitive',
             },
           },
@@ -150,9 +181,9 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<voi
       pagination: {
         total,
         page: pageNum,
-        limit: limitNum,
         totalPages: Math.ceil(total / limitNum),
       },
+      source: 'local',
     });
   } catch (error) {
     console.error('Get movies error:', error);
