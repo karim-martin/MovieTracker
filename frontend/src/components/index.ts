@@ -4,3 +4,6 @@ export { ConfirmModal } from './ConfirmModal';
 export { MessageModal } from './MessageModal';
 export { MovieDetailsModal } from './MovieDetailsModal';
 export { Footer } from './Footer';
+export { Navigation } from './Navigation';
+export { ProtectedRoute } from './ProtectedRoute';
+export { AdminRoute } from './AdminRoute';

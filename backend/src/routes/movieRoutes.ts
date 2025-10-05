@@ -8,8 +8,7 @@ import {
   deleteMovie,
   getRecommendations,
 } from '../controllers/movieController';
-import { auth } from '../middlewares/auth';
-import { adminAuth } from '../middlewares/adminAuth';
+import { auth, adminAuth } from '../middlewares/auth';
 import { validate } from '../middlewares/validator';
 
 const router = Router();

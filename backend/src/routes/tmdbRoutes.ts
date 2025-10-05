@@ -10,8 +10,7 @@ import {
   discoverByGenre,
   importMovieFromTMDB,
 } from '../controllers/tmdbController';
-import { auth } from '../middlewares/auth';
-import { adminAuth } from '../middlewares/adminAuth';
+import { auth, adminAuth } from '../middlewares/auth';
 
 const router = Router();
 

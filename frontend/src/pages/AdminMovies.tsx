@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { movieAPI } from '../services/api';
 import { Movie } from '../types';
-import { LoadingSpinner, ConfirmModal, MessageModal } from '../components/common';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { MessageModal } from '../components/MessageModal';
 
 interface MovieFormData {
   title: string;

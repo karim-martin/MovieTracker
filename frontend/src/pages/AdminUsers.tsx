@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Table, Button, Badge } from 'react-bootstrap';
 import { useUsers } from '../hooks';
-import { LoadingSpinner, ConfirmModal, MessageModal } from '../components/common';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { MessageModal } from '../components/MessageModal';
 import { User } from '../types';
 
 export default function AdminUsers() {

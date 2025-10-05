@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Card, Row, Col, Form, Button, Alert, Badge } from 'react-bootstrap';
 import { useMovies, useRecommendations } from '../hooks';
-import { LoadingSpinner, MovieCard, MessageModal, MovieDetailsModal } from '../components/common';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { MovieCard } from '../components/MovieCard';
+import { MessageModal } from '../components/MessageModal';
+import { MovieDetailsModal } from '../components/MovieDetailsModal';
 import { MovieSearchParams, Movie } from '../types';
 import { useAuth } from '../AuthContext';
 

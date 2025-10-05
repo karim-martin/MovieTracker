@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { AuthProvider } from './AuthContext';
-import { Navigation } from './components/navigation/Navigation';
-import { Footer } from './components/common';
-import { ProtectedRoute, AdminRoute } from './components/routes';
+import { Navigation } from './components/Navigation';
+import { Footer } from './components/Footer';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Login from './pages/Login';
 import Register from './pages/Register';

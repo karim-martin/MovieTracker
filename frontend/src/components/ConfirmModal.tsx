@@ -11,15 +11,8 @@ interface ConfirmModalProps {
   variant?: 'danger' | 'primary' | 'warning';
 }
 
-export const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  show,
-  title,
-  message,
-  onConfirm,
-  onCancel,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  variant = 'danger'
+export const ConfirmModal: React.FC<ConfirmModalProps> = ({ show, title, message, onConfirm, onCancel, confirmText = 'Confirm', 
+  cancelText = 'Cancel', variant = 'danger'
 }) => {
   return (
     <Modal show={show} onHide={onCancel} centered>

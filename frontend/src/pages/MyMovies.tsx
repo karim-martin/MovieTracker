@@ -1,7 +1,8 @@
 import { Card, Table, Badge, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useRatings } from '../hooks';
-import { LoadingSpinner, MessageModal } from '../components/common';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { MessageModal } from '../components/MessageModal';
 
 export default function MyMovies() {
   const { ratings, loading, error } = useRatings();

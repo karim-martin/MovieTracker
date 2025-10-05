@@ -6,8 +6,7 @@ import {
   unblockUser,
   deleteUser,
 } from '../controllers/userController';
-import { auth } from '../middlewares/auth';
-import { adminAuth } from '../middlewares/adminAuth';
+import { auth, adminAuth } from '../middlewares/auth';
 
 const router = Router();
 
