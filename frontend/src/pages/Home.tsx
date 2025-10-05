@@ -5,7 +5,7 @@ import { movieAPI, genreAPI } from '../api';
 
 export default function Home() {
   const [movies, setMovies] = useState<any[]>([]);
-  const [genres, setGenres] = useState<any[]>([]);
+  const [, setGenres] = useState<any[]>([]);
   const [searchTitle, setSearchTitle] = useState('');
   const [searchGenre, setSearchGenre] = useState('');
   const [searchPerson, setSearchPerson] = useState('');

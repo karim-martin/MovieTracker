@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
-import { movieAPI, genreAPI, personAPI } from '../api';
+import { movieAPI } from '../api';
 
 export default function AdminMovies() {
   const [movies, setMovies] = useState<any[]>([]);

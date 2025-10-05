@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Modal, Form, Alert, Badge, ListGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { collectionAPI, movieAPI } from '../api';
+import { collectionAPI } from '../api';
 
 export default function Collections() {
   const [collections, setCollections] = useState<any[]>([]);
