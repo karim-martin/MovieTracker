@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/errorHandler';
+import { setupSwagger } from './config/swagger';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -21,6 +22,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Swagger Documentation
+setupSwagger(app);
 
 // Health check
 app.get('/health', (req, res) => {
