@@ -1,0 +1,151 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  username    String       @unique
+  password    String
+  role        Role         @default(USER)
+  isBlocked   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  ratings     UserRating[]
+  collections Collection[]
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Movie {
+  id              String            @id @default(uuid())
+  title           String
+  releaseYear     Int
+  plot            String?
+  posterUrl       String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  genres          MovieGenre[]
+  credits         MovieCredit[]
+  externalRatings ExternalRating[]
+  userRatings     UserRating[]
+  collections     CollectionMovie[]
+
+  @@map("movies")
+}
+
+model Genre {
+  id     String       @id @default(uuid())
+  name   String       @unique
+  movies MovieGenre[]
+
+  @@map("genres")
+}
+
+model Person {
+  id     String        @id @default(uuid())
+  name   String
+  type   PersonType
+  movies MovieCredit[]
+
+  @@map("people")
+}
+
+enum PersonType {
+  ACTOR
+  DIRECTOR
+  PRODUCER
+}
+
+model MovieGenre {
+  id      String @id @default(uuid())
+  movieId String
+  genreId String
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, genreId])
+  @@map("movie_genres")
+}
+
+model MovieCredit {
+  id            String  @id @default(uuid())
+  movieId       String
+  personId      String
+  role          String
+  characterName String?
+  movie         Movie   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  person        Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("movie_credits")
+}
+
+model ExternalRating {
+  id          String       @id @default(uuid())
+  movieId     String
+  source      RatingSource
+  rating      Float
+  ratingCount Int?
+  movie       Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, source])
+  @@map("external_ratings")
+}
+
+enum RatingSource {
+  IMDB
+  ROTTEN_TOMATOES
+}
+
+model UserRating {
+  id          String   @id @default(uuid())
+  movieId     String
+  userId      String
+  rating      Float
+  review      String?
+  watchedDate DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  movie       Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, userId])
+  @@map("user_ratings")
+}
+
+model Collection {
+  id          String            @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movies      CollectionMovie[]
+
+  @@map("collections")
+}
+
+model CollectionMovie {
+  id           String     @id @default(uuid())
+  collectionId String
+  movieId      String
+  addedAt      DateTime   @default(now())
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  movie        Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, movieId])
+  @@map("collection_movies")
+}
