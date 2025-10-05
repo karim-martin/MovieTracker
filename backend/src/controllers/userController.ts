@@ -7,15 +7,7 @@ const prisma = new PrismaClient();
 export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        role: true,
-        isBlocked: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: {id: true, email: true, username: true, role: true, isBlocked: true, createdAt: true, updatedAt: true},
       orderBy: { createdAt: 'desc' },
     });
 

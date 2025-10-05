@@ -27,139 +27,57 @@ const options: swaggerJsdoc.Options = {
         Error: {
           type: 'object',
           properties: {
-            error: {
-              type: 'string',
-              description: 'Error message',
-            },
+            error: {type: 'string', description: 'Error message'},
           },
         },
         User: {
           type: 'object',
           properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-            },
-            username: {
-              type: 'string',
-            },
-            role: {
-              type: 'string',
-              enum: ['USER', 'ADMIN'],
-            },
-            isBlocked: {
-              type: 'boolean',
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-            },
-            updatedAt: {
-              ztype: 'string',
-              format: 'date-time',
-            },
+            id: {type: 'string', format: 'uuid' },
+            email: {type: 'string', format: 'email' },
+            username: {type: 'string' },
+            role: {type: 'string', enum: ['USER', 'ADMIN'] },
+            isBlocked: {type: 'boolean' },
+            createdAt: {type: 'string', format: 'date-time' }, 
+            updatedAt: {type: 'string', format: 'date-time'}
           },
         },
         Movie: {
           type: 'object',
           properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-            },
-            title: {
-              type: 'string',
-            },
-            releaseYear: {
-              type: 'integer',
-            },
-            plot: {
-              type: 'string',
-              nullable: true,
-            },
-            posterUrl: {
-              type: 'string',
-              nullable: true,
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-            },
+            id: {type: 'string',  format: 'uuid'},
+            title: {type: 'string'},
+            releaseYear: {type: 'integer'},
+            plot: {type: 'string', nullable: true},
+            posterUrl: {type: 'string',  nullable: true},
+            createdAt: {type: 'string',  format: 'date-time'},
+            updatedAt: {type: 'string',  format: 'date-time'}
           },
         },
         Genre: {
           type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-            },
-            name: {
-              type: 'string',
-            },
+          properties: {id: {  type: 'string',  format: 'uuid',},
+          name: {  type: 'string',}
           },
         },
         Person: {
           type: 'object',
           properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-            },
-            name: {
-              type: 'string',
-            },
-            type: {
-              type: 'string',
-              enum: ['ACTOR', 'DIRECTOR', 'PRODUCER'],
-            },
+            id: {type: 'string', format: 'uuid'},
+            name: {type: 'string'},
+            type: {type: 'string', enum: ['ACTOR', 'DIRECTOR', 'PRODUCER']}
           },
         },
         UserRating: {
           type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-            },
-            movieId: {
-              type: 'string',
-              format: 'uuid',
-            },
-            userId: {
-              type: 'string',
-              format: 'uuid',
-            },
-            rating: {
-              type: 'number',
-              format: 'float',
-              minimum: 0,
-              maximum: 10,
-            },
-            review: {
-              type: 'string',
-              nullable: true,
-            },
-            watchedDate: {
-              type: 'string',
-              format: 'date-time',
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-            },
+          properties: {id: {  type: 'string',  format: 'uuid',},
+          movieId: {  type: 'string',  format: 'uuid',},
+          userId: {  type: 'string',  format: 'uuid',},
+          rating: {  type: 'number',  format: 'float',  minimum: 0,  maximum: 10,},
+          review: {  type: 'string',  nullable: true,},
+          watchedDate: {  type: 'string',  format: 'date-time',},
+          createdAt: {  type: 'string',  format: 'date-time',},
+          updatedAt: {  type: 'string',  format: 'date-time',}
           },
         },
       },
