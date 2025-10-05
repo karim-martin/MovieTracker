@@ -1,12 +1,12 @@
-import { Card, Badge } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Card, Badge, Button } from 'react-bootstrap';
 import { Movie } from '../../types';
 
 interface MovieCardProps {
   movie: Movie;
+  onViewDetails?: (movieId: string) => void;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails }) => {
   return (
     <Card>
       {movie.posterUrl && (
@@ -34,9 +34,14 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             </Badge>
           </div>
         ))}
-        <Link to={`/movies/${movie.id}`} className="btn btn-primary btn-sm mt-2">
+        <Button
+          variant="dark"
+          size="sm"
+          className="mt-2"
+          onClick={() => onViewDetails?.(movie.id)}
+        >
           View Details
-        </Link>
+        </Button>
       </Card.Body>
     </Card>
   );

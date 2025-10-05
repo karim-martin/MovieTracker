@@ -8,11 +8,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
 
     const result = await registerUser({ email, username, password });
 
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: result.user,
-      token: result.token,
-    });
+    res.status(201).json({ message: 'User registered successfully', user: result.user, token: result.token });  
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });
@@ -28,11 +24,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
 
     const result = await loginUser({ email, password });
 
-    res.status(200).json({
-      message: 'Login successful',
-      user: result.user,
-      token: result.token,
-    });
+    res.status(200).json({ message: 'Login successful', user: result.user, token: result.token });
   } catch (error) {
     if (error instanceof Error) {
       res.status(401).json({ error: error.message });

@@ -15,11 +15,7 @@ export const createCollection = async (req: AuthRequest, res: Response): Promise
     const userId = req.user.userId;
 
     const collection = await prisma.collection.create({
-      data: {
-        userId,
-        name,
-        description,
-      },
+      data: { userId, name, description },
     });
 
     res.status(201).json({

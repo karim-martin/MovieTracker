@@ -67,3 +67,42 @@ export const useMovie = (id: string): UseMovieResult => {
 
   return { movie, loading, error, refetch: fetchMovie };
 };
+
+interface UseRecommendationsResult {
+  recommendations: Movie[];
+  loading: boolean;
+  error: string;
+  message: string;
+  refetch: () => Promise<void>;
+}
+
+export const useRecommendations = (limit?: number): UseRecommendationsResult => {
+  const [recommendations, setRecommendations] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  const fetchRecommendations = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await movieAPI.getRecommendations(limit);
+      setRecommendations(response.data.recommendations);
+      setMessage(response.data.message);
+    } catch (err: any) {
+      // Don't show error for unauthenticated users
+      if (err.response?.status !== 401) {
+        setError(err.response?.data?.error || 'Failed to load recommendations');
+      }
+      setRecommendations([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [limit]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [fetchRecommendations]);
+
+  return { recommendations, loading, error, message, refetch: fetchRecommendations };
+};

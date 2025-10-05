@@ -12,7 +12,7 @@ export const Navigation: React.FC = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
+    <Navbar bg="dark" variant="dark" expand="lg" className="mb-4" sticky="top">
       <Container>
         <Navbar.Brand href="/">🎬 Movie Tracker</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

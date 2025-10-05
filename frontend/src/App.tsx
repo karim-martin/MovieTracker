@@ -2,12 +2,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Container } from 'react-bootstrap';
 import { AuthProvider } from './AuthContext';
 import { Navigation } from './components/navigation/Navigation';
+import { Footer } from './components/common';
 import { ProtectedRoute, AdminRoute } from './components/routes';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
-import MovieDetails from './pages/MovieDetails';
 import MyMovies from './pages/MyMovies';
 import Collections from './pages/Collections';
 import AdminDashboard from './pages/AdminDashboard';
@@ -19,12 +19,11 @@ function AppContent() {
   return (
     <>
       <Navigation />
-      <Container>
+      <Container style={{ paddingBottom: '80px' }}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
-          <Route path="/movies/:id" element={<MovieDetails />} />
           <Route
             path="/my-movies"
             element={
@@ -68,6 +67,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>
+      <Footer />
     </>
   );
 }

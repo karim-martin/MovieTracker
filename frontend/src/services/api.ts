@@ -77,6 +77,8 @@ export const movieAPI = {
     api.get('/movies', { params }),
   getMovieById: (id: string): Promise<AxiosResponse<{ movie: Movie }>> =>
     api.get(`/movies/${id}`),
+  getRecommendations: (limit?: number): Promise<AxiosResponse<{ recommendations: Movie[]; message: string }>> =>
+    api.get('/movies/recommendations', { params: { limit } }),
   createMovie: (data: Partial<Movie>): Promise<AxiosResponse> =>
     api.post('/movies', data),
   updateMovie: (id: string, data: Partial<Movie>): Promise<AxiosResponse> =>

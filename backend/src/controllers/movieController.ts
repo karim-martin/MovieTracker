@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middlewares/auth';
 import { tmdbService } from '../services/tmdbService';
+import { recommendationService } from '../services/recommendationService';
 
 const prisma = new PrismaClient();
 
@@ -264,6 +265,33 @@ export const deleteMovie = async (req: AuthRequest, res: Response): Promise<void
 
     res.status(200).json({ message: 'Movie deleted successfully' });
   } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getRecommendations = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { limit = '10' } = req.query;
+    const limitNum = parseInt(limit as string);
+
+    const recommendations = await recommendationService.getRecommendations(
+      req.user.userId,
+      limitNum
+    );
+
+    res.status(200).json({
+      recommendations,
+      message: recommendations.length > 0
+        ? 'Recommendations generated based on your viewing history'
+        : 'No recommendations available yet. Start rating movies!',
+    });
+  } catch (error) {
+    console.error('Get recommendations error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

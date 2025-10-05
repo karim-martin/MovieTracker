@@ -6,6 +6,7 @@ import {
   getMovieById,
   updateMovie,
   deleteMovie,
+  getRecommendations,
 } from '../controllers/movieController';
 import { auth } from '../middlewares/auth';
 import { adminAuth } from '../middlewares/adminAuth';
@@ -56,6 +57,40 @@ const movieValidation = [
  *                 $ref: '#/components/schemas/Movie'
  */
 router.get('/', getAllMovies);
+
+/**
+ * @openapi
+ * /api/movies/recommendations:
+ *   get:
+ *     tags: [Movies]
+ *     summary: Get personalized movie recommendations
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of recommendations to return
+ *     responses:
+ *       200:
+ *         description: List of recommended movies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 recommendations:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Movie'
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/recommendations', auth, getRecommendations);
 
 /**
  * @openapi
