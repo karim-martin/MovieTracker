@@ -1,36 +1,31 @@
-import { useState, useEffect } from 'react';
 import { Card, Table, Badge, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { ratingAPI } from '../api';
+import { useRatings } from '../hooks';
+import { LoadingSpinner, MessageModal } from '../components/common';
 
 export default function MyMovies() {
-  const [ratings, setRatings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { ratings, loading, error } = useRatings();
 
-  useEffect(() => {
-    fetchMyRatings();
-  }, []);
-
-  const fetchMyRatings = async () => {
-    try {
-      const response = await ratingAPI.getMyRatings();
-      setRatings(response.data.ratings);
-    } catch (err) {
-      setError('Failed to load your movies');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <Alert variant="danger">{error}</Alert>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
       <h1 className="mb-4">My Watched Movies</h1>
+
+      {error && (
+        <MessageModal
+          show={true}
+          title="Error"
+          message={error}
+          variant="danger"
+          onClose={() => window.location.reload()}
+        />
+      )}
+
       {ratings.length === 0 ? (
-        <Alert variant="info">You haven't rated any movies yet. <Link to="/">Browse movies</Link> to get started!</Alert>
+        <Alert variant="info">
+          You haven't rated any movies yet. <Link to="/">Browse movies</Link> to get started!
+        </Alert>
       ) : (
         <Card>
           <Card.Body>

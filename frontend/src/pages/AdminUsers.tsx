@@ -1,57 +1,65 @@
-import { useState, useEffect } from 'react';
-import { Table, Button, Badge, Alert } from 'react-bootstrap';
-import { userAPI } from '../api';
+import { useState } from 'react';
+import { Table, Button, Badge } from 'react-bootstrap';
+import { useUsers } from '../hooks';
+import { LoadingSpinner, ConfirmModal, MessageModal } from '../components/common';
+import { User } from '../types';
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { users, loading, error, blockUser, unblockUser, deleteUser } = useUsers();
+  const [deleteModal, setDeleteModal] = useState<{ show: boolean; userId: string; username: string }>({
+    show: false,
+    userId: '',
+    username: ''
+  });
+  const [errorModal, setErrorModal] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: ''
+  });
+  const [successModal, setSuccessModal] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: ''
+  });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await userAPI.getAllUsers();
-      setUsers(response.data.users);
-    } catch (err) {
-      setError('Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBlockUnblock = async (userId: string, isBlocked: boolean) => {
+  const handleBlockUnblock = async (userId: string, isBlocked: boolean, username: string) => {
     try {
       if (isBlocked) {
-        await userAPI.unblockUser(userId);
+        await unblockUser(userId);
+        setSuccessModal({ show: true, message: `User "${username}" has been unblocked successfully.` });
       } else {
-        await userAPI.blockUser(userId);
+        await blockUser(userId);
+        setSuccessModal({ show: true, message: `User "${username}" has been blocked successfully.` });
       }
-      fetchUsers();
-    } catch (err) {
-      setError('Failed to update user status');
+    } catch (err: any) {
+      setErrorModal({ show: true, message: err.message });
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await userAPI.deleteUser(userId);
-        fetchUsers();
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to delete user');
-      }
+  const confirmDelete = async () => {
+    try {
+      await deleteUser(deleteModal.userId);
+      setDeleteModal({ show: false, userId: '', username: '' });
+      setSuccessModal({ show: true, message: `User "${deleteModal.username}" has been deleted successfully.` });
+    } catch (err: any) {
+      setDeleteModal({ show: false, userId: '', username: '' });
+      setErrorModal({ show: true, message: err.message });
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
       <h1 className="mb-4">Manage Users</h1>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && (
+        <MessageModal
+          show={true}
+          title="Error"
+          message={error}
+          variant="danger"
+          onClose={() => window.location.reload()}
+        />
+      )}
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -63,7 +71,7 @@ export default function AdminUsers() {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {users.map((user: User) => (
             <tr key={user.id}>
               <td>{user.username}</td>
               <td>{user.email}</td>
@@ -79,13 +87,17 @@ export default function AdminUsers() {
                 <Button
                   variant={user.isBlocked ? 'success' : 'warning'}
                   size="sm"
-                  onClick={() => handleBlockUnblock(user.id, user.isBlocked)}
+                  onClick={() => handleBlockUnblock(user.id, user.isBlocked, user.username)}
                   className="me-2"
                 >
                   {user.isBlocked ? 'Unblock' : 'Block'}
                 </Button>
                 {user.role !== 'ADMIN' && (
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(user.id)}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setDeleteModal({ show: true, userId: user.id, username: user.username })}
+                  >
                     Delete
                   </Button>
                 )}
@@ -94,6 +106,33 @@ export default function AdminUsers() {
           ))}
         </tbody>
       </Table>
+
+      <ConfirmModal
+        show={deleteModal.show}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete user "${deleteModal.username}"? This action cannot be undone.`}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteModal({ show: false, userId: '', username: '' })}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+
+      <MessageModal
+        show={errorModal.show}
+        title="Error"
+        message={errorModal.message}
+        variant="danger"
+        onClose={() => setErrorModal({ show: false, message: '' })}
+      />
+
+      <MessageModal
+        show={successModal.show}
+        title="Success"
+        message={successModal.message}
+        variant="success"
+        onClose={() => setSuccessModal({ show: false, message: '' })}
+      />
     </div>
   );
 }

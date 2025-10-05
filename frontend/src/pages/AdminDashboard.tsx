@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Row, Col } from 'react-bootstrap';
-import { movieAPI, userAPI } from '../api';
+import { movieAPI, userAPI } from '../services/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ totalMovies: 0, totalUsers: 0 });

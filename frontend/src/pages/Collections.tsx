@@ -1,49 +1,40 @@
-import { useState, useEffect } from 'react';
-import { Card, Button, Modal, Form, Alert, Badge, ListGroup } from 'react-bootstrap';
+import { useState } from 'react';
+import { Card, Button, Modal, Form, Badge, ListGroup, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { collectionAPI } from '../api';
+import { useCollections } from '../hooks';
+import { LoadingSpinner, MessageModal } from '../components/common';
 
 export default function Collections() {
-  const [collections, setCollections] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { collections, loading, error, createCollection } = useCollections();
   const [showModal, setShowModal] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [newCollectionDesc, setNewCollectionDesc] = useState('');
-
-  useEffect(() => {
-    fetchCollections();
-  }, []);
-
-  const fetchCollections = async () => {
-    try {
-      const response = await collectionAPI.getMyCollections();
-      setCollections(response.data.collections);
-    } catch (err) {
-      setError('Failed to load collections');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [errorModal, setErrorModal] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: ''
+  });
+  const [successModal, setSuccessModal] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: ''
+  });
 
   const handleCreateCollection = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await collectionAPI.createCollection({
+      await createCollection({
         name: newCollectionName,
         description: newCollectionDesc,
       });
       setShowModal(false);
       setNewCollectionName('');
       setNewCollectionDesc('');
-      fetchCollections();
+      setSuccessModal({ show: true, message: `Collection "${newCollectionName}" created successfully!` });
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create collection');
+      setErrorModal({ show: true, message: err.message });
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <Alert variant="danger">{error}</Alert>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -54,8 +45,20 @@ export default function Collections() {
         </Button>
       </div>
 
+      {error && (
+        <MessageModal
+          show={true}
+          title="Error"
+          message={error}
+          variant="danger"
+          onClose={() => window.location.reload()}
+        />
+      )}
+
       {collections.length === 0 ? (
-        <Alert variant="info">You don't have any collections yet. Create one to organize your movies!</Alert>
+        <Alert variant="info">
+          You don't have any collections yet. Create one to organize your movies!
+        </Alert>
       ) : (
         collections.map((collection) => (
           <Card key={collection.id} className="mb-3">
@@ -64,7 +67,7 @@ export default function Collections() {
               {collection.description && <Card.Text>{collection.description}</Card.Text>}
               <Badge bg="secondary">{collection.movies.length} movies</Badge>
               <ListGroup variant="flush" className="mt-2">
-                {collection.movies.map((cm: any) => (
+                {collection.movies.map((cm) => (
                   <ListGroup.Item key={cm.id}>
                     <Link to={`/movies/${cm.movie.id}`}>{cm.movie.title}</Link> ({cm.movie.releaseYear})
                   </ListGroup.Item>
@@ -75,6 +78,7 @@ export default function Collections() {
         ))
       )}
 
+      {/* Create Collection Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create New Collection</Modal.Title>
@@ -99,12 +103,35 @@ export default function Collections() {
                 onChange={(e) => setNewCollectionDesc(e.target.value)}
               />
             </Form.Group>
-            <Button variant="primary" type="submit">
-              Create
-            </Button>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="secondary" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                Create
+              </Button>
+            </div>
           </Form>
         </Modal.Body>
       </Modal>
+
+      {/* Error Modal */}
+      <MessageModal
+        show={errorModal.show}
+        title="Error"
+        message={errorModal.message}
+        variant="danger"
+        onClose={() => setErrorModal({ show: false, message: '' })}
+      />
+
+      {/* Success Modal */}
+      <MessageModal
+        show={successModal.show}
+        title="Success"
+        message={successModal.message}
+        variant="success"
+        onClose={() => setSuccessModal({ show: false, message: '' })}
+      />
     </div>
   );
 }

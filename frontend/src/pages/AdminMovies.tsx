@@ -1,14 +1,40 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
-import { movieAPI } from '../api';
+import { Table, Button, Modal, Form } from 'react-bootstrap';
+import { movieAPI } from '../services/api';
+import { Movie } from '../types';
+import { LoadingSpinner, ConfirmModal, MessageModal } from '../components/common';
+
+interface MovieFormData {
+  title: string;
+  releaseYear: number | '';
+  plot: string;
+  posterUrl: string;
+}
 
 export default function AdminMovies() {
-  const [movies, setMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [editingMovie, setEditingMovie] = useState<any>(null);
-  const [formData, setFormData] = useState({ title: '', releaseYear: '', plot: '', posterUrl: '' });
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
+  const [formData, setFormData] = useState<MovieFormData>({
+    title: '',
+    releaseYear: '',
+    plot: '',
+    posterUrl: ''
+  });
+  const [deleteModal, setDeleteModal] = useState<{ show: boolean; movieId: string; movieTitle: string }>({
+    show: false,
+    movieId: '',
+    movieTitle: ''
+  });
+  const [errorModal, setErrorModal] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: ''
+  });
+  const [successModal, setSuccessModal] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: ''
+  });
 
   useEffect(() => {
     fetchMovies();
@@ -18,8 +44,8 @@ export default function AdminMovies() {
     try {
       const response = await movieAPI.getAllMovies();
       setMovies(response.data.movies);
-    } catch (err) {
-      setError('Failed to load movies');
+    } catch (err: any) {
+      setErrorModal({ show: true, message: err.message || 'Failed to load movies' });
     } finally {
       setLoading(false);
     }
@@ -28,32 +54,42 @@ export default function AdminMovies() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const movieData = {
+        title: formData.title,
+        releaseYear: Number(formData.releaseYear),
+        plot: formData.plot,
+        posterUrl: formData.posterUrl
+      };
+
       if (editingMovie) {
-        await movieAPI.updateMovie(editingMovie.id, formData);
+        await movieAPI.updateMovie(editingMovie.id, movieData);
+        setSuccessModal({ show: true, message: `Movie "${formData.title}" updated successfully!` });
       } else {
-        await movieAPI.createMovie(formData);
+        await movieAPI.createMovie(movieData);
+        setSuccessModal({ show: true, message: `Movie "${formData.title}" created successfully!` });
       }
-      setShowModal(false);
+      setShowFormModal(false);
       setEditingMovie(null);
       setFormData({ title: '', releaseYear: '', plot: '', posterUrl: '' });
       fetchMovies();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save movie');
+      setErrorModal({ show: true, message: err.response?.data?.error || 'Failed to save movie' });
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this movie?')) {
-      try {
-        await movieAPI.deleteMovie(id);
-        fetchMovies();
-      } catch (err) {
-        setError('Failed to delete movie');
-      }
+  const confirmDelete = async () => {
+    try {
+      await movieAPI.deleteMovie(deleteModal.movieId);
+      setDeleteModal({ show: false, movieId: '', movieTitle: '' });
+      setSuccessModal({ show: true, message: `Movie "${deleteModal.movieTitle}" deleted successfully!` });
+      fetchMovies();
+    } catch (err: any) {
+      setDeleteModal({ show: false, movieId: '', movieTitle: '' });
+      setErrorModal({ show: true, message: err.message || 'Failed to delete movie' });
     }
   };
 
-  const openEditModal = (movie: any) => {
+  const openEditModal = (movie: Movie) => {
     setEditingMovie(movie);
     setFormData({
       title: movie.title,
@@ -61,16 +97,16 @@ export default function AdminMovies() {
       plot: movie.plot || '',
       posterUrl: movie.posterUrl || '',
     });
-    setShowModal(true);
+    setShowFormModal(true);
   };
 
   const openCreateModal = () => {
     setEditingMovie(null);
     setFormData({ title: '', releaseYear: '', plot: '', posterUrl: '' });
-    setShowModal(true);
+    setShowFormModal(true);
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -78,7 +114,7 @@ export default function AdminMovies() {
         <h1>Manage Movies</h1>
         <Button variant="primary" onClick={openCreateModal}>Add Movie</Button>
       </div>
-      {error && <Alert variant="danger">{error}</Alert>}
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -93,15 +129,24 @@ export default function AdminMovies() {
               <td>{movie.title}</td>
               <td>{movie.releaseYear}</td>
               <td>
-                <Button variant="warning" size="sm" onClick={() => openEditModal(movie)} className="me-2">Edit</Button>
-                <Button variant="danger" size="sm" onClick={() => handleDelete(movie.id)}>Delete</Button>
+                <Button variant="warning" size="sm" onClick={() => openEditModal(movie)} className="me-2">
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setDeleteModal({ show: true, movieId: movie.id, movieTitle: movie.title })}
+                >
+                  Delete
+                </Button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      {/* Movie Form Modal */}
+      <Modal show={showFormModal} onHide={() => setShowFormModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{editingMovie ? 'Edit Movie' : 'Add Movie'}</Modal.Title>
         </Modal.Header>
@@ -121,7 +166,7 @@ export default function AdminMovies() {
               <Form.Control
                 type="number"
                 value={formData.releaseYear}
-                onChange={(e) => setFormData({ ...formData, releaseYear: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, releaseYear: e.target.value ? Number(e.target.value) : '' })}
                 required
               />
             </Form.Group>
@@ -142,10 +187,47 @@ export default function AdminMovies() {
                 onChange={(e) => setFormData({ ...formData, posterUrl: e.target.value })}
               />
             </Form.Group>
-            <Button variant="primary" type="submit">Save</Button>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="secondary" onClick={() => setShowFormModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                Save
+              </Button>
+            </div>
           </Form>
         </Modal.Body>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        show={deleteModal.show}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete "${deleteModal.movieTitle}"? This action cannot be undone.`}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteModal({ show: false, movieId: '', movieTitle: '' })}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+
+      {/* Error Modal */}
+      <MessageModal
+        show={errorModal.show}
+        title="Error"
+        message={errorModal.message}
+        variant="danger"
+        onClose={() => setErrorModal({ show: false, message: '' })}
+      />
+
+      {/* Success Modal */}
+      <MessageModal
+        show={successModal.show}
+        title="Success"
+        message={successModal.message}
+        variant="success"
+        onClose={() => setSuccessModal({ show: false, message: '' })}
+      />
     </div>
   );
 }

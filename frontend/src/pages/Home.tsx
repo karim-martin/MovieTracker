@@ -1,53 +1,27 @@
-import { useState, useEffect } from 'react';
-import { Card, Row, Col, Form, Button, Badge, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { movieAPI, genreAPI } from '../api';
+import { useState } from 'react';
+import { Card, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { useMovies } from '../hooks';
+import { LoadingSpinner, MovieCard, MessageModal } from '../components/common';
+import { MovieSearchParams } from '../types';
 
 export default function Home() {
-  const [movies, setMovies] = useState<any[]>([]);
-  const [, setGenres] = useState<any[]>([]);
+  const [searchParams, setSearchParams] = useState<MovieSearchParams>({});
   const [searchTitle, setSearchTitle] = useState('');
   const [searchGenre, setSearchGenre] = useState('');
   const [searchPerson, setSearchPerson] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchGenres();
-    fetchMovies();
-  }, []);
-
-  const fetchGenres = async () => {
-    try {
-      const response = await genreAPI.getAllGenres();
-      setGenres(response.data.genres);
-    } catch (err) {
-      console.error('Failed to fetch genres');
-    }
-  };
-
-  const fetchMovies = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const params: any = {};
-      if (searchTitle) params.title = searchTitle;
-      if (searchGenre) params.genre = searchGenre;
-      if (searchPerson) params.person = searchPerson;
-
-      const response = await movieAPI.getAllMovies(params);
-      setMovies(response.data.movies);
-    } catch (err: any) {
-      setError('Failed to load movies');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { movies, loading, error } = useMovies(searchParams);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchMovies();
+    const params: MovieSearchParams = {};
+    if (searchTitle) params.title = searchTitle;
+    if (searchGenre) params.genre = searchGenre;
+    if (searchPerson) params.person = searchPerson;
+    setSearchParams(params);
   };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -100,50 +74,29 @@ export default function Home() {
         </Card.Body>
       </Card>
 
-      {error && <Alert variant="danger">{error}</Alert>}
-
-      {loading ? (
-        <div className="text-center">Loading...</div>
-      ) : (
-        <Row>
-          {movies.length === 0 ? (
-            <Col>
-              <Alert variant="info">No movies found. Try adjusting your search.</Alert>
-            </Col>
-          ) : (
-            movies.map((movie) => (
-              <Col md={4} key={movie.id} className="mb-4">
-                <Card>
-                  {movie.posterUrl && (
-                    <Card.Img variant="top" src={movie.posterUrl} style={{ height: '300px', objectFit: 'cover' }} />
-                  )}
-                  <Card.Body>
-                    <Card.Title>{movie.title}</Card.Title>
-                    <Card.Text className="text-muted">{movie.releaseYear}</Card.Text>
-                    <div className="mb-2">
-                      {movie.genres?.map((mg: any) => (
-                        <Badge key={mg.id} bg="secondary" className="me-1">
-                          {mg.genre.name}
-                        </Badge>
-                      ))}
-                    </div>
-                    {movie.externalRatings?.map((rating: any) => (
-                      <div key={rating.id} className="mb-1">
-                        <Badge bg="warning" text="dark">
-                          {rating.source}: {rating.rating}/10
-                        </Badge>
-                      </div>
-                    ))}
-                    <Link to={`/movies/${movie.id}`} className="btn btn-primary btn-sm mt-2">
-                      View Details
-                    </Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))
-          )}
-        </Row>
+      {error && (
+        <MessageModal
+          show={true}
+          title="Error"
+          message={error}
+          variant="danger"
+          onClose={() => window.location.reload()}
+        />
       )}
+
+      <Row>
+        {movies.length === 0 ? (
+          <Col>
+            <Alert variant="info">No movies found. Try adjusting your search.</Alert>
+          </Col>
+        ) : (
+          movies.map((movie) => (
+            <Col md={4} key={movie.id} className="mb-4">
+              <MovieCard movie={movie} />
+            </Col>
+          ))
+        )}
+      </Row>
     </div>
   );
 }

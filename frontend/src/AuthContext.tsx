@@ -1,13 +1,11 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { authAPI } from './api';
+import { authAPI } from './services/api';
+import { User, LoginInput, RegisterInput, AuthResponse } from './types';
 
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: 'USER' | 'ADMIN';
-  isBlocked: boolean;
+interface JWTPayload {
+  exp: number;
+  [key: string]: any;
 }
 
 interface AuthContextType {
@@ -35,7 +33,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (storedToken && storedUser) {
       try {
-        const decoded: any = jwtDecode(storedToken);
+        const decoded = jwtDecode<JWTPayload>(storedToken);
 
         // Check if token is expired
         if (decoded.exp * 1000 < Date.now()) {
@@ -43,7 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           localStorage.removeItem('user');
         } else {
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setUser(JSON.parse(storedUser) as User);
         }
       } catch (error) {
         localStorage.removeItem('token');
@@ -54,10 +52,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await authAPI.login({ email, password });
-      const { token: newToken, user: newUser } = response.data;
+      const loginData: LoginInput = { email, password };
+      const response = await authAPI.login(loginData);
+      const authResponse: AuthResponse = response.data;
+      const { token: newToken, user: newUser } = authResponse;
 
       if (newUser.isBlocked) {
         throw new Error('Your account has been blocked. Please contact administrator.');
@@ -68,25 +68,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setToken(newToken);
       setUser(newUser);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Login failed');
+      throw new Error(error.response?.data?.error || error.message || 'Login failed');
     }
   };
 
-  const register = async (email: string, username: string, password: string) => {
+  const register = async (email: string, username: string, password: string): Promise<void> => {
     try {
-      const response = await authAPI.register({ email, username, password });
-      const { token: newToken, user: newUser } = response.data;
+      const registerData: RegisterInput = { email, username, password };
+      const response = await authAPI.register(registerData);
+      const authResponse: AuthResponse = response.data;
+      const { token: newToken, user: newUser } = authResponse;
 
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setToken(newToken);
       setUser(newUser);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Registration failed');
+      throw new Error(error.response?.data?.error || error.message || 'Registration failed');
     }
   };
 
-  const logout = () => {
+  const logout = (): void => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);
@@ -114,7 +116,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
