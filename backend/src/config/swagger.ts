@@ -59,7 +59,7 @@ const options: swaggerJsdoc.Options = {
               format: 'date-time',
             },
             updatedAt: {
-              type: 'string',
+              ztype: 'string',
               format: 'date-time',
             },
           },

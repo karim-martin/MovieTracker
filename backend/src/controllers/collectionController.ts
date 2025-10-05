@@ -18,10 +18,7 @@ export const createCollection = async (req: AuthRequest, res: Response): Promise
       data: { userId, name, description },
     });
 
-    res.status(201).json({
-      message: 'Collection created successfully',
-      collection,
-    });
+    res.status(201).json({ message: 'Collection created successfully', collection });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
