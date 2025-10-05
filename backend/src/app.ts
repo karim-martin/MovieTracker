@@ -12,7 +12,6 @@ import movieRoutes from './routes/movieRoutes';
 import genreRoutes from './routes/genreRoutes';
 import personRoutes from './routes/personRoutes';
 import ratingRoutes from './routes/ratingRoutes';
-import collectionRoutes from './routes/collectionRoutes';
 import tmdbRoutes from './routes/tmdbRoutes';
 
 const app: Application = express();
@@ -42,7 +41,6 @@ app.use('/api/movies', movieRoutes);
 app.use('/api/genres', genreRoutes);
 app.use('/api/people', personRoutes);
 app.use('/api/ratings', ratingRoutes);
-app.use('/api/collections', collectionRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 
 // 404 handler

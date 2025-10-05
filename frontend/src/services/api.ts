@@ -8,8 +8,6 @@ import {
   MovieSearchParams,
   CreateRatingInput,
   RatingsResponse,
-  CreateCollectionInput,
-  CollectionsResponse,
   GenresResponse,
   PersonSearchParams,
   Movie
@@ -113,20 +111,6 @@ export const ratingAPI = {
   updateRating: (id: string, data: Partial<CreateRatingInput>): Promise<AxiosResponse> =>
     api.put(`/ratings/${id}`, data),
   deleteRating: (id: string): Promise<AxiosResponse> => api.delete(`/ratings/${id}`),
-};
-
-// Collection API
-export const collectionAPI = {
-  createCollection: (data: CreateCollectionInput): Promise<AxiosResponse> =>
-    api.post('/collections', data),
-  getMyCollections: (): Promise<AxiosResponse<CollectionsResponse>> =>
-    api.get('/collections/my'),
-  getCollectionById: (id: string): Promise<AxiosResponse> => api.get(`/collections/${id}`),
-  addMovieToCollection: (collectionId: string, movieId: string): Promise<AxiosResponse> =>
-    api.post(`/collections/${collectionId}/movies`, { movieId }),
-  removeMovieFromCollection: (collectionId: string, movieId: string): Promise<AxiosResponse> =>
-    api.delete(`/collections/${collectionId}/movies/${movieId}`),
-  deleteCollection: (id: string): Promise<AxiosResponse> => api.delete(`/collections/${id}`),
 };
 
 export default api;

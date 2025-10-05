@@ -12,7 +12,6 @@ export const Footer: React.FC = () => {
           <Nav className="ms-auto">
             <Nav.Link href="/">Home</Nav.Link>
             <Nav.Link href="/my-movies">My Movies</Nav.Link>
-            <Nav.Link href="/collections">Collections</Nav.Link>
           </Nav>
           <Navbar.Text className="ms-3">
             &copy; {currentYear} Movie Tracker | Powered by TMDB API

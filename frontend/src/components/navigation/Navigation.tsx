@@ -22,7 +22,6 @@ export const Navigation: React.FC = () => {
               <>
                 <Nav.Link href="/">Home</Nav.Link>
                 <Nav.Link href="/my-movies">My Movies</Nav.Link>
-                <Nav.Link href="/collections">Collections</Nav.Link>
                 {isAdmin && (
                   <>
                     <Nav.Link href="/admin">Admin Dashboard</Nav.Link>

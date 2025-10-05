@@ -9,7 +9,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import MyMovies from './pages/MyMovies';
-import Collections from './pages/Collections';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMovies from './pages/AdminMovies';
 import AdminUsers from './pages/AdminUsers';
@@ -29,14 +28,6 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <MyMovies />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/collections"
-            element={
-              <ProtectedRoute>
-                <Collections />
               </ProtectedRoute>
             }
           />
