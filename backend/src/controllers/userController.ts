@@ -44,15 +44,6 @@ export const getUserById = async (req: AuthRequest, res: Response): Promise<void
             movie: true,
           },
         },
-        collections: {
-          include: {
-            movies: {
-              include: {
-                movie: true,
-              },
-            },
-          },
-        },
       },
     });
 

@@ -8,7 +8,7 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'Movie Tracker API',
       version: '1.0.0',
-      description: 'A comprehensive API for tracking movies, ratings, and user collections',
+      description: 'A comprehensive API for tracking movies and ratings',
       contact: {
         name: 'API Support',
       },
@@ -120,34 +120,6 @@ const options: swaggerJsdoc.Options = {
             type: {
               type: 'string',
               enum: ['ACTOR', 'DIRECTOR', 'PRODUCER'],
-            },
-          },
-        },
-        Collection: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              format: 'uuid',
-            },
-            userId: {
-              type: 'string',
-              format: 'uuid',
-            },
-            name: {
-              type: 'string',
-            },
-            description: {
-              type: 'string',
-              nullable: true,
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
             },
           },
         },

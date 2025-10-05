@@ -1,5 +1,3 @@
-// This is your Prisma schema file
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,16 +8,15 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
-  username    String       @unique
-  password    String
-  role        Role         @default(USER)
-  isBlocked   Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  ratings     UserRating[]
-  collections Collection[]
+  id        String       @id @default(uuid())
+  email     String       @unique
+  username  String       @unique
+  password  String
+  role      Role         @default(USER)
+  isBlocked Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  ratings   UserRating[]
 
   @@map("users")
 }
@@ -41,7 +38,6 @@ model Movie {
   credits         MovieCredit[]
   externalRatings ExternalRating[]
   userRatings     UserRating[]
-  collections     CollectionMovie[]
 
   @@map("movies")
 }
@@ -123,29 +119,4 @@ model UserRating {
 
   @@unique([movieId, userId])
   @@map("user_ratings")
-}
-
-model Collection {
-  id          String            @id @default(uuid())
-  userId      String
-  name        String
-  description String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  movies      CollectionMovie[]
-
-  @@map("collections")
-}
-
-model CollectionMovie {
-  id           String     @id @default(uuid())
-  collectionId String
-  movieId      String
-  addedAt      DateTime   @default(now())
-  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  movie        Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
-
-  @@unique([collectionId, movieId])
-  @@map("collection_movies")
 }

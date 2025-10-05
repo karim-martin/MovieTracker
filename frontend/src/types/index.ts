@@ -72,24 +72,6 @@ export interface CreateRatingInput {
   watchedDate: string;
 }
 
-// Collection Types
-export interface Collection {
-  id: string;
-  name: string;
-  description?: string;
-  movies: CollectionMovie[];
-}
-
-export interface CollectionMovie {
-  id: string;
-  movie: Movie;
-}
-
-export interface CreateCollectionInput {
-  name: string;
-  description?: string;
-}
-
 // Auth Types
 export interface LoginInput {
   email: string;
@@ -126,10 +108,6 @@ export interface UsersResponse {
 
 export interface RatingsResponse {
   ratings: UserRating[];
-}
-
-export interface CollectionsResponse {
-  collections: Collection[];
 }
 
 export interface GenresResponse {
