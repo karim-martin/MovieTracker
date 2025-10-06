@@ -1,5 +1,5 @@
 import { Card, Badge, Button } from 'react-bootstrap';
-import { Movie } from '../../types';
+import { Movie, MovieGenre, ExternalRating } from '../types';
 
 interface MovieCardProps {
   movie: Movie;
@@ -21,13 +21,13 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails }) =>
         <Card.Title>{movie.title}</Card.Title>
         <Card.Text className="text-muted">{movie.releaseYear}</Card.Text>
         <div className="mb-2">
-          {movie.genres?.map((mg) => (
+          {movie.genres?.map((mg: MovieGenre) => (
             <Badge key={mg.id} bg="secondary" className="me-1">
               {mg.genre.name}
             </Badge>
           ))}
         </div>
-        {movie.externalRatings?.map((rating) => (
+        {movie.externalRatings?.map((rating: ExternalRating) => (
           <div key={rating.id} className="mb-1">
             <Badge bg="warning" text="dark">
               {rating.source}: {rating.rating}/10

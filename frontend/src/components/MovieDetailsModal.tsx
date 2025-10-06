@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Modal, Row, Col, Badge, Form, Button, Card } from 'react-bootstrap';
-import { LoadingSpinner, MessageModal } from '.';
-import { useAuth } from '../../AuthContext';
-import { ratingAPI } from '../../services/api';
-import { Movie } from '../../types';
+import { MessageModal } from '.';
+import { useAuth } from '../AuthContext';
+import { ratingAPI } from '../services/api';
+import { Movie, Credit, MovieGenre, ExternalRating, UserRating } from '../types';
 
 interface MovieDetailsModalProps {
   show: boolean;
@@ -53,21 +53,22 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
       setRating('');
       setReview('');
       setWatchedDate('');
-    } catch (err: any) {
-      setErrorModal({ show: true, message: err.response?.data?.error || 'Failed to submit rating' });
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setErrorModal({ show: true, message: error.response?.data?.error || 'Failed to submit rating' });
     }
   };
 
   if (!show || !movie) return null;
 
   // Separate credits by role
-  const directors = movie.credits?.filter(c => c.role.toLowerCase() === 'director') || [];
-  const producers = movie.credits?.filter(c => c.role.toLowerCase() === 'producer') || [];
-  const cast = movie.credits?.filter(c => c.role.toLowerCase() === 'actor') || [];
+  const directors = movie.credits?.filter((c: Credit) => c.role.toLowerCase() === 'director') || [];
+  const producers = movie.credits?.filter((c: Credit) => c.role.toLowerCase() === 'producer') || [];
+  const cast = movie.credits?.filter((c: Credit) => c.role.toLowerCase() === 'actor') || [];
 
   // Calculate internal rating (average of user ratings)
   const internalRating = movie.userRatings?.length
-    ? (movie.userRatings.reduce((sum, r) => sum + r.rating, 0) / movie.userRatings.length).toFixed(1)
+    ? (movie.userRatings.reduce((sum: number, r: UserRating) => sum + r.rating, 0) / movie.userRatings.length).toFixed(1)
     : 'N/A';
 
   return (
@@ -87,7 +88,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
               {/* Genres */}
               <div className="mb-3">
                 <strong>Genres: </strong>
-                {movie.genres?.map((mg) => (
+                {movie.genres?.map((mg: MovieGenre) => (
                   <Badge key={mg.id} bg="secondary" className="me-1">
                     {mg.genre.name}
                   </Badge>
@@ -107,7 +108,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 <div className="mb-3">
                   <strong>Director{directors.length > 1 ? 's' : ''}:</strong>
                   <div>
-                    {directors.map((credit) => (
+                    {directors.map((credit: Credit) => (
                       <span key={credit.id} className="me-2">
                         {credit.person.name}
                       </span>
@@ -121,7 +122,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 <div className="mb-3">
                   <strong>Producer{producers.length > 1 ? 's' : ''}:</strong>
                   <div>
-                    {producers.map((credit) => (
+                    {producers.map((credit: Credit) => (
                       <span key={credit.id} className="me-2">
                         {credit.person.name}
                       </span>
@@ -135,7 +136,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 <div className="mb-3">
                   <strong>Cast:</strong>
                   <div>
-                    {cast.map((credit) => (
+                    {cast.map((credit: Credit) => (
                       <div key={credit.id}>
                         <span>{credit.person.name}</span>
                         {credit.characterName && <span className="text-muted"> as {credit.characterName}</span>}
@@ -150,7 +151,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 <strong>External Ratings:</strong>
                 <div>
                   {movie.externalRatings?.length ? (
-                    movie.externalRatings.map((rating) => (
+                    movie.externalRatings.map((rating: ExternalRating) => (
                       <div key={rating.id} className="mb-1">
                         <Badge bg="warning" text="dark" className="me-2">
                           {rating.source}: {rating.rating}/10
@@ -236,7 +237,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 <p className="text-muted">No user ratings yet</p>
               ) : (
                 <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                  {movie.userRatings?.map((userRating) => (
+                  {movie.userRatings?.map((userRating: UserRating) => (
                     <Card key={userRating.id} className="mb-2">
                       <Card.Body>
                         <div className="d-flex justify-content-between">
