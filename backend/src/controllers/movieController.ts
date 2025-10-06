@@ -296,3 +296,56 @@ export const getRecommendations = async (req: AuthRequest, res: Response): Promi
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const discoverMovies = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const {
+      with_genres,
+      sort_by,
+      'primary_release_date.gte': releaseDateGte,
+      'primary_release_date.lte': releaseDateLte,
+      'vote_average.gte': voteAverageGte,
+      'vote_average.lte': voteAverageLte,
+      with_original_language,
+      page = '1',
+    } = req.query;
+
+    const filters: any = { page: parseInt(page as string) };
+
+    if (with_genres) filters.with_genres = with_genres as string;
+    if (sort_by) filters.sort_by = sort_by as string;
+    if (releaseDateGte) filters['primary_release_date.gte'] = releaseDateGte as string;
+    if (releaseDateLte) filters['primary_release_date.lte'] = releaseDateLte as string;
+    if (voteAverageGte) filters['vote_average.gte'] = parseFloat(voteAverageGte as string);
+    if (voteAverageLte) filters['vote_average.lte'] = parseFloat(voteAverageLte as string);
+    if (with_original_language) filters.with_original_language = with_original_language as string;
+
+    const tmdbResults = await tmdbService.discoverMovies(filters);
+
+    const movies = tmdbResults.results.map((movie) => ({
+      id: movie.id.toString(),
+      tmdbId: movie.id,
+      title: movie.title,
+      releaseYear: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+      plot: movie.overview,
+      posterUrl: tmdbService.getPosterUrl(movie.poster_path),
+      backdropUrl: tmdbService.getBackdropUrl(movie.backdrop_path),
+      rating: movie.vote_average,
+      voteCount: movie.vote_count,
+      source: 'tmdb' as const,
+    }));
+
+    res.status(200).json({
+      movies,
+      pagination: {
+        total: tmdbResults.total_results,
+        page: parseInt(page as string),
+        totalPages: tmdbResults.total_pages,
+      },
+      source: 'tmdb',
+    });
+  } catch (error) {
+    logger.error('Discover movies error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

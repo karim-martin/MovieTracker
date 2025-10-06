@@ -7,6 +7,7 @@ import {
   updateMovie,
   deleteMovie,
   getRecommendations,
+  discoverMovies,
 } from '../controllers/movieController';
 import { auth, adminAuth } from '../middlewares/auth';
 import { validate } from '../middlewares/validator';
@@ -56,6 +57,63 @@ const movieValidation = [
  *                 $ref: '#/components/schemas/Movie'
  */
 router.get('/', getAllMovies);
+
+/**
+ * @openapi
+ * /api/movies/discover:
+ *   get:
+ *     tags: [Movies]
+ *     summary: Discover movies from TMDB with flexible filters
+ *     parameters:
+ *       - in: query
+ *         name: with_genres
+ *         schema:
+ *           type: string
+ *         description: Comma-separated genre IDs
+ *       - in: query
+ *         name: sort_by
+ *         schema:
+ *           type: string
+ *           enum: [popularity.asc, popularity.desc, release_date.asc, release_date.desc, vote_average.asc, vote_average.desc]
+ *         description: Sort order
+ *       - in: query
+ *         name: primary_release_date.gte
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Minimum release date (YYYY-MM-DD)
+ *       - in: query
+ *         name: primary_release_date.lte
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Maximum release date (YYYY-MM-DD)
+ *       - in: query
+ *         name: vote_average.gte
+ *         schema:
+ *           type: number
+ *         description: Minimum vote average
+ *       - in: query
+ *         name: vote_average.lte
+ *         schema:
+ *           type: number
+ *         description: Maximum vote average
+ *       - in: query
+ *         name: with_original_language
+ *         schema:
+ *           type: string
+ *         description: Language code (e.g., en, es, fr)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       200:
+ *         description: Discovered movies from TMDB
+ */
+router.get('/discover', discoverMovies);
 
 /**
  * @openapi

@@ -1,4 +1,4 @@
-import { MovieDb } from 'moviedb-promise';
+import { MovieDb, DiscoverMovieRequest } from 'moviedb-promise';
 
 const tmdb = new MovieDb(process.env.TMDB_API_KEY || '');
 
@@ -136,6 +136,18 @@ export const tmdbService = {
       with_genres: genreId.toString(),
       page,
     });
+    return {
+      results: response.results as TMDBMovie[],
+      total_pages: response.total_pages || 0,
+      total_results: response.total_results || 0,
+    };
+  },
+
+  /**
+   * Discover movies with flexible filters
+   */
+  async discoverMovies(filters: DiscoverMovieRequest): Promise<{ results: TMDBMovie[]; total_pages: number; total_results: number }> {
+    const response = await tmdb.discoverMovie(filters);
     return {
       results: response.results as TMDBMovie[],
       total_pages: response.total_pages || 0,
