@@ -19,7 +19,7 @@ export default function AdminDashboard() {
         totalMovies: moviesRes.data.pagination?.total || moviesRes.data.movies.length,
         totalUsers: usersRes.data.users.length,
       });
-    } catch (err) {
+    } catch {
       console.error('Failed to load stats');
     }
   };

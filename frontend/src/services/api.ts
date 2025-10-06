@@ -1,17 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-import {
-  LoginInput,
-  RegisterInput,
-  AuthResponse,
-  MoviesResponse,
-  UsersResponse,
-  MovieSearchParams,
-  CreateRatingInput,
-  RatingsResponse,
-  GenresResponse,
-  PersonSearchParams,
-  Movie
-} from '../types';
+import { LoginInput, RegisterInput, AuthResponse, MoviesResponse, UsersResponse, MovieSearchParams, CreateRatingInput, 
+  RatingsResponse, GenresResponse, PersonSearchParams, Movie} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 

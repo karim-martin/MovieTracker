@@ -2,8 +2,11 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import expressWinston from 'express-winston';
+import winston from 'winston';
 import { errorHandler } from './middlewares/errorHandler';
 import { setupSwagger } from './config/swagger';
+import logger from './config/logger';
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -25,6 +28,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// HTTP request logging (before routes)
+app.use(expressWinston.logger({
+  winstonInstance: logger,
+  meta: true,
+  msg: 'HTTP {{req.method}} {{req.url}}',
+  expressFormat: true,
+  colorize: false,
+  ignoreRoute: (req) => {
+    // Skip logging for health check
+    return req.url === '/health';
+  },
+}));
 
 // Swagger Documentation
 setupSwagger(app);

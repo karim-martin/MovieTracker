@@ -1,3 +1,4 @@
+import logger from '../config/logger';
 import { Request, Response } from 'express';
 import { tmdbService } from '../services/tmdbService';
 import { PrismaClient } from '@prisma/client';
@@ -31,7 +32,7 @@ export const searchMovies = async (req: Request, res: Response) => {
       total_results: results.total_results,
     });
   } catch (error) {
-    console.error('Error searching movies:', error);
+    logger.error('Error searching movies:', error);
     res.status(500).json({ error: 'Failed to search movies' });
   }
 };
@@ -57,7 +58,7 @@ export const getPopularMovies = async (req: Request, res: Response) => {
       total_results: results.total_results,
     });
   } catch (error) {
-    console.error('Error fetching popular movies:', error);
+    logger.error('Error fetching popular movies:', error);
     res.status(500).json({ error: 'Failed to fetch popular movies' });
   }
 };
@@ -83,7 +84,7 @@ export const getTopRatedMovies = async (req: Request, res: Response) => {
       total_results: results.total_results,
     });
   } catch (error) {
-    console.error('Error fetching top rated movies:', error);
+    logger.error('Error fetching top rated movies:', error);
     res.status(500).json({ error: 'Failed to fetch top rated movies' });
   }
 };
@@ -109,7 +110,7 @@ export const getNowPlayingMovies = async (req: Request, res: Response) => {
       total_results: results.total_results,
     });
   } catch (error) {
-    console.error('Error fetching now playing movies:', error);
+    logger.error('Error fetching now playing movies:', error);
     res.status(500).json({ error: 'Failed to fetch now playing movies' });
   }
 };
@@ -135,7 +136,7 @@ export const getUpcomingMovies = async (req: Request, res: Response) => {
       total_results: results.total_results,
     });
   } catch (error) {
-    console.error('Error fetching upcoming movies:', error);
+    logger.error('Error fetching upcoming movies:', error);
     res.status(500).json({ error: 'Failed to fetch upcoming movies' });
   }
 };
@@ -156,7 +157,7 @@ export const getMovieDetails = async (req: Request, res: Response) => {
 
     res.json(movieWithImages);
   } catch (error) {
-    console.error('Error fetching movie details:', error);
+    logger.error('Error fetching movie details:', error);
     res.status(500).json({ error: 'Failed to fetch movie details' });
   }
 };
@@ -169,7 +170,7 @@ export const getGenres = async (req: Request, res: Response) => {
     const genres = await tmdbService.getGenres();
     res.json(genres);
   } catch (error) {
-    console.error('Error fetching genres:', error);
+    logger.error('Error fetching genres:', error);
     res.status(500).json({ error: 'Failed to fetch genres' });
   }
 };
@@ -197,7 +198,7 @@ export const discoverByGenre = async (req: Request, res: Response) => {
       total_results: results.total_results,
     });
   } catch (error) {
-    console.error('Error discovering movies by genre:', error);
+    logger.error('Error discovering movies by genre:', error);
     res.status(500).json({ error: 'Failed to discover movies by genre' });
   }
 };
@@ -328,7 +329,7 @@ export const importMovieFromTMDB = async (req: Request, res: Response) => {
 
     res.status(201).json(completeMovie);
   } catch (error) {
-    console.error('Error importing movie from TMDB:', error);
+    logger.error('Error importing movie from TMDB:', error);
     res.status(500).json({ error: 'Failed to import movie from TMDB' });
   }
 };

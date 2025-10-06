@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { movieAPI } from '../services/api';
-import { Movie, MovieSearchParams } from '../types';
+import { Movie, MovieSearchParams, APIError } from '../types';
 
 interface UseMoviesResult {
   movies: Movie[];
@@ -20,8 +20,9 @@ export const useMovies = (params?: MovieSearchParams): UseMoviesResult => {
     try {
       const response = await movieAPI.getAllMovies(params);
       setMovies(response.data.movies);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load movies');
+    } catch (err) {
+      const error = err as APIError;
+      setError(error.response?.data?.error || 'Failed to load movies');
     } finally {
       setLoading(false);
     }
@@ -52,8 +53,9 @@ export const useMovie = (id: string): UseMovieResult => {
     try {
       const response = await movieAPI.getMovieById(id);
       setMovie(response.data.movie);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load movie');
+    } catch (err) {
+      const error = err as APIError;
+      setError(error.response?.data?.error || 'Failed to load movie');
     } finally {
       setLoading(false);
     }
@@ -89,10 +91,11 @@ export const useRecommendations = (limit?: number): UseRecommendationsResult => 
       const response = await movieAPI.getRecommendations(limit);
       setRecommendations(response.data.recommendations);
       setMessage(response.data.message);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as APIError;
       // Don't show error for unauthenticated users
-      if (err.response?.status !== 401) {
-        setError(err.response?.data?.error || 'Failed to load recommendations');
+      if (error.response?.status !== 401) {
+        setError(error.response?.data?.error || 'Failed to load recommendations');
       }
       setRecommendations([]);
     } finally {

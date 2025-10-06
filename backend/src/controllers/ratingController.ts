@@ -1,3 +1,4 @@
+import logger from '../config/logger';
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middlewares/auth';
@@ -47,7 +48,7 @@ export const createRating = async (req: AuthRequest, res: Response): Promise<voi
       rating: userRating,
     });
   } catch (error) {
-    console.error('Create rating error:', error);
+    logger.error('Create rating error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

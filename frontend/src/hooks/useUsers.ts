@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { userAPI } from '../services/api';
-import { User } from '../types';
+import { User, APIError } from '../types';
 
 interface UseUsersResult {
   users: User[];
@@ -23,8 +23,9 @@ export const useUsers = (): UseUsersResult => {
     try {
       const response = await userAPI.getAllUsers();
       setUsers(response.data.users);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load users');
+    } catch (err) {
+      const error = err as APIError;
+      setError(error.response?.data?.error || 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -34,8 +35,9 @@ export const useUsers = (): UseUsersResult => {
     try {
       await userAPI.blockUser(id);
       await fetchUsers();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Failed to block user');
+    } catch (err) {
+      const error = err as APIError;
+      throw new Error(error.response?.data?.error || 'Failed to block user');
     }
   };
 
@@ -43,8 +45,9 @@ export const useUsers = (): UseUsersResult => {
     try {
       await userAPI.unblockUser(id);
       await fetchUsers();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Failed to unblock user');
+    } catch (err) {
+      const error = err as APIError;
+      throw new Error(error.response?.data?.error || 'Failed to unblock user');
     }
   };
 
@@ -52,8 +55,9 @@ export const useUsers = (): UseUsersResult => {
     try {
       await userAPI.deleteUser(id);
       await fetchUsers();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Failed to delete user');
+    } catch (err) {
+      const error = err as APIError;
+      throw new Error(error.response?.data?.error || 'Failed to delete user');
     }
   };
 

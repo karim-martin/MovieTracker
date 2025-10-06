@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { movieAPI } from '../services/api';
-import { Movie } from '../types';
+import { Movie, APIError } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { MessageModal } from '../components/MessageModal';
@@ -46,8 +46,9 @@ export default function AdminMovies() {
     try {
       const response = await movieAPI.getAllMovies();
       setMovies(response.data.movies);
-    } catch (err: any) {
-      setErrorModal({ show: true, message: err.message || 'Failed to load movies' });
+    } catch (err) {
+      const error = err as APIError;
+      setErrorModal({ show: true, message: error.message || 'Failed to load movies' });
     } finally {
       setLoading(false);
     }
@@ -74,8 +75,9 @@ export default function AdminMovies() {
       setEditingMovie(null);
       setFormData({ title: '', releaseYear: '', plot: '', posterUrl: '' });
       fetchMovies();
-    } catch (err: any) {
-      setErrorModal({ show: true, message: err.response?.data?.error || 'Failed to save movie' });
+    } catch (err) {
+      const error = err as APIError;
+      setErrorModal({ show: true, message: error.response?.data?.error || 'Failed to save movie' });
     }
   };
 
@@ -85,9 +87,10 @@ export default function AdminMovies() {
       setDeleteModal({ show: false, movieId: '', movieTitle: '' });
       setSuccessModal({ show: true, message: `Movie "${deleteModal.movieTitle}" deleted successfully!` });
       fetchMovies();
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as APIError;
       setDeleteModal({ show: false, movieId: '', movieTitle: '' });
-      setErrorModal({ show: true, message: err.message || 'Failed to delete movie' });
+      setErrorModal({ show: true, message: error.message || 'Failed to delete movie' });
     }
   };
 

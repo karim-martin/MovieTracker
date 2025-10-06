@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ratingAPI } from '../services/api';
-import { UserRating, CreateRatingInput } from '../types';
+import { UserRating, CreateRatingInput, APIError } from '../types';
 
 interface UseRatingsResult {
   ratings: UserRating[];
@@ -23,8 +23,9 @@ export const useRatings = (): UseRatingsResult => {
     try {
       const response = await ratingAPI.getMyRatings();
       setRatings(response.data.ratings);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load ratings');
+    } catch (err) {
+      const error = err as APIError;
+      setError(error.response?.data?.error || 'Failed to load ratings');
     } finally {
       setLoading(false);
     }
@@ -34,8 +35,9 @@ export const useRatings = (): UseRatingsResult => {
     try {
       await ratingAPI.createRating(data);
       await fetchRatings();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Failed to create rating');
+    } catch (err) {
+      const error = err as APIError;
+      throw new Error(error.response?.data?.error || 'Failed to create rating');
     }
   };
 
@@ -43,8 +45,9 @@ export const useRatings = (): UseRatingsResult => {
     try {
       await ratingAPI.updateRating(id, data);
       await fetchRatings();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Failed to update rating');
+    } catch (err) {
+      const error = err as APIError;
+      throw new Error(error.response?.data?.error || 'Failed to update rating');
     }
   };
 
@@ -52,8 +55,9 @@ export const useRatings = (): UseRatingsResult => {
     try {
       await ratingAPI.deleteRating(id);
       await fetchRatings();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Failed to delete rating');
+    } catch (err) {
+      const error = err as APIError;
+      throw new Error(error.response?.data?.error || 'Failed to delete rating');
     }
   };
 

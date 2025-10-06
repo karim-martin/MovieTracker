@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middlewares/auth';
 import { tmdbService } from '../services/tmdbService';
 import { recommendationService } from '../services/recommendationService';
+import logger from '../config/logger';
 
 const prisma = new PrismaClient();
 
@@ -79,12 +80,12 @@ export const createMovie = async (req: AuthRequest, res: Response): Promise<void
       movie: fullMovie,
     });
   } catch (error) {
-    console.error('Create movie error:', error);
+    logger.error('Create movie error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-export const getAllMovies = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
     const { title, genre, source = 'tmdb', page = '1' } = req.query;
     const pageNum = parseInt(page as string);
@@ -187,7 +188,7 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<voi
       source: 'local',
     });
   } catch (error) {
-    console.error('Get movies error:', error);
+    logger.error('Get movies error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -291,7 +292,7 @@ export const getRecommendations = async (req: AuthRequest, res: Response): Promi
         : 'No recommendations available yet. Start rating movies!',
     });
   } catch (error) {
-    console.error('Get recommendations error:', error);
+    logger.error('Get recommendations error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -97,7 +97,7 @@ export const tmdbService = {
    * Get upcoming movies
    */
   async getUpcomingMovies(page: number = 1): Promise<{ results: TMDBMovie[]; total_pages: number; total_results: number }> {
-    const response = await tmdb.movieUpcoming({ page });
+    const response = await tmdb.upcomingMovies({ page });
     return {
       results: response.results as TMDBMovie[],
       total_pages: response.total_pages || 0,

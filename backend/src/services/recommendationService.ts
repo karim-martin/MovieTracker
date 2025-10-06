@@ -1,3 +1,4 @@
+import logger from '../config/logger';
 import { PrismaClient } from '@prisma/client';
 import { tmdbService, TMDBMovie } from './tmdbService';
 
@@ -67,11 +68,8 @@ export const recommendationService = {
         .map(g => g.genreId);
 
       // Get movie IDs user has already rated to exclude them
-      const ratedMovieIds = new Set(
-        userRatings
-          .map(r => r.movie.tmdbId)
-          .filter((id): id is number => id !== null)
-      );
+      // Note: Local movies don't have tmdbId, so this set will be empty for local movies
+      const ratedMovieIds = new Set<number>();
 
       // Fetch recommendations from TMDB for each top genre
       const recommendations: RecommendationMovie[] = [];
@@ -88,33 +86,33 @@ export const recommendationService = {
 
           recommendations.push(...genreRecommendations);
         } catch (error) {
-          console.error(`Error fetching recommendations for genre ${genreId}:`, error);
+          logger.error(`Error fetching recommendations for genre ${genreId}:`, error);
         }
       }
 
       // If user has high-rated movies, also get similar movies
-      const highlyRatedMovies = userRatings.filter(r => r.rating >= averageUserRating && r.rating >= 7);
-
-      if (highlyRatedMovies.length > 0 && recommendations.length < limit) {
-        for (const rating of highlyRatedMovies.slice(0, 2)) {
-          if (rating.movie.tmdbId) {
-            try {
-              const similarMovies = await this.getSimilarMovies(rating.movie.tmdbId);
-              const filtered = similarMovies
-                .filter(movie => !ratedMovieIds.has(movie.id))
-                .slice(0, 3)
-                .map(movie => ({
-                  ...this.convertTMDBToRecommendation(movie, 0, genreScores),
-                  recommendationReason: `Because you liked "${rating.movie.title}"`,
-                }));
-
-              recommendations.push(...filtered);
-            } catch (error) {
-              console.error(`Error fetching similar movies for ${rating.movie.tmdbId}:`, error);
-            }
-          }
-        }
-      }
+      // Note: This feature requires movies to have tmdbId, which is not in the current schema
+      // Commenting out until schema is updated to include tmdbId field
+      // const highlyRatedMovies = userRatings.filter(r => r.rating >= averageUserRating && r.rating >= 7);
+      // if (highlyRatedMovies.length > 0 && recommendations.length < limit) {
+      //   for (const rating of highlyRatedMovies.slice(0, 2)) {
+      //     if (rating.movie.tmdbId) {
+      //       try {
+      //         const similarMovies = await this.getSimilarMovies(rating.movie.tmdbId);
+      //         const filtered = similarMovies
+      //           .filter(movie => !ratedMovieIds.has(movie.id))
+      //           .slice(0, 3)
+      //           .map(movie => ({
+      //             ...this.convertTMDBToRecommendation(movie, 0, genreScores),
+      //             recommendationReason: `Because you liked "${rating.movie.title}"`,
+      //           }));
+      //         recommendations.push(...filtered);
+      //       } catch (error) {
+      //         logger.error(`Error fetching similar movies for ${rating.movie.tmdbId}:`, error);
+      //       }
+      //     }
+      //   }
+      // }
 
       // Score and rank recommendations
       const scoredRecommendations = recommendations.map(movie => ({
@@ -128,7 +126,7 @@ export const recommendationService = {
 
       return uniqueRecommendations.slice(0, limit);
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      logger.error('Error generating recommendations:', error);
       // Fallback to popular movies
       return this.getPopularMoviesAsRecommendations(limit);
     }
@@ -175,10 +173,10 @@ export const recommendationService = {
       const response = await fetch(
         `https://api.themoviedb.org/3/movie/${tmdbId}/similar?api_key=${process.env.TMDB_API_KEY}`
       );
-      const data = await response.json();
+      const data = await response.json() as { results?: TMDBMovie[] };
       return data.results || [];
     } catch (error) {
-      console.error('Error fetching similar movies:', error);
+      logger.error('Error fetching similar movies:', error);
       return [];
     }
   },
@@ -267,7 +265,7 @@ export const recommendationService = {
         recommendationReason: 'Popular movie you might enjoy',
       }));
     } catch (error) {
-      console.error('Error fetching popular movies:', error);
+      logger.error('Error fetching popular movies:', error);
       return [];
     }
   },

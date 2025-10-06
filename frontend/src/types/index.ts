@@ -127,3 +127,14 @@ export interface PersonSearchParams {
   name?: string;
   type?: string;
 }
+
+// API Error Type
+export interface APIError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+}

@@ -1,14 +1,16 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { authAPI } from './services/api';
-import { User, LoginInput, RegisterInput, AuthResponse } from './types';
+import { User, LoginInput, RegisterInput, AuthResponse, APIError } from './types';
 
 interface JWTPayload {
   exp: number;
-  [key: string]: any;
+  userId?: string;
+  email?: string;
+  role?: string;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
@@ -43,7 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setToken(storedToken);
           setUser(JSON.parse(storedUser) as User);
         }
-      } catch (error) {
+      } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -67,7 +69,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('user', JSON.stringify(newUser));
       setToken(newToken);
       setUser(newUser);
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as APIError;
       throw new Error(error.response?.data?.error || error.message || 'Login failed');
     }
   };
@@ -83,7 +86,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('user', JSON.stringify(newUser));
       setToken(newToken);
       setUser(newUser);
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as APIError;
       throw new Error(error.response?.data?.error || error.message || 'Registration failed');
     }
   };
@@ -99,27 +103,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const isAuthenticated = !!user && !!token;
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        loading,
-        login,
-        register,
-        logout,
-        isAdmin,
-        isAuthenticated,
-      }}
-    >
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAdmin, isAuthenticated,}}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+// Export hook separately to avoid fast-refresh issues
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}

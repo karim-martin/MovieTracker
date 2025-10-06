@@ -24,38 +24,10 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
-          <Route
-            path="/my-movies"
-            element={
-              <ProtectedRoute>
-                <MyMovies />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/movies"
-            element={
-              <AdminRoute>
-                <AdminMovies />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <AdminRoute>
-                <AdminUsers />
-              </AdminRoute>
-            }
-          />
+          <Route path="/my-movies" element={   <ProtectedRoute>     <MyMovies />   </ProtectedRoute> }/>
+          <Route path="/admin" element={ <AdminRoute> <AdminDashboard /> </AdminRoute>}/>
+          <Route path="/admin/movies" element={   <AdminRoute>     <AdminMovies />   </AdminRoute> }/>
+          <Route path="/admin/users" element={   <AdminRoute>     <AdminUsers />   </AdminRoute> }/>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>

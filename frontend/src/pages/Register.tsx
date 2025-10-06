@@ -30,8 +30,9 @@ export default function Register() {
     try {
       await register(email, username, password);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     } finally {
       setLoading(false);
     }

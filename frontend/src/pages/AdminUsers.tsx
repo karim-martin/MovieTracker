@@ -31,8 +31,9 @@ export default function AdminUsers() {
         await blockUser(userId);
         setSuccessModal({ show: true, message: `User "${username}" has been blocked successfully.` });
       }
-    } catch (err: any) {
-      setErrorModal({ show: true, message: err.message });
+    } catch (err) {
+      const error = err as Error;
+      setErrorModal({ show: true, message: error.message });
     }
   };
 
@@ -41,9 +42,10 @@ export default function AdminUsers() {
       await deleteUser(deleteModal.userId);
       setDeleteModal({ show: false, userId: '', username: '' });
       setSuccessModal({ show: true, message: `User "${deleteModal.username}" has been deleted successfully.` });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       setDeleteModal({ show: false, userId: '', username: '' });
-      setErrorModal({ show: true, message: err.message });
+      setErrorModal({ show: true, message: error.message });
     }
   };
 
