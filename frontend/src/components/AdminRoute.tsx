@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../services/AuthContext';
 import { LoadingSpinner } from './LoadingSpinner';
 
 interface AdminRouteProps { children: React.ReactNode;}

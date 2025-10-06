@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
-import { AuthProvider } from './AuthContext';
+import { AuthProvider } from './services/AuthContext';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { ProtectedRoute } from './components/ProtectedRoute';

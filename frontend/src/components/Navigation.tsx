@@ -1,6 +1,6 @@
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../services/AuthContext';
 
 export const Navigation: React.FC = () => {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();

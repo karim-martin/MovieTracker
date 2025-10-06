@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../services/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');

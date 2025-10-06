@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Row, Col, Badge, Form, Button, Card } from 'react-bootstrap';
 import { MessageModal } from '.';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../services/AuthContext';
 import { ratingAPI } from '../services/api';
 import { Movie, Credit, MovieGenre, ExternalRating, UserRating } from '../types';
 

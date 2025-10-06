@@ -6,7 +6,7 @@ import { MovieCard } from '../components/MovieCard';
 import { MessageModal } from '../components/MessageModal';
 import { MovieDetailsModal } from '../components/MovieDetailsModal';
 import { MovieSearchParams, Movie } from '../types';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../services/AuthContext';
 
 export default function Home() {
   const [searchParams, setSearchParams] = useState<MovieSearchParams>({});
