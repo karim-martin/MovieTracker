@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { authAPI } from './services/api';
-import { User, LoginInput, RegisterInput, AuthResponse, APIError } from './types';
+import { authAPI } from './api';
+import { User, LoginInput, RegisterInput, AuthResponse, APIError } from '../types';
 
 interface JWTPayload {
   exp: number;
