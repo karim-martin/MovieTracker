@@ -18,8 +18,8 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
 }) => {
   const { isAuthenticated } = useAuth();
 
-  const [rating, setRating] = useState('');
-  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(0);
+  const [hoveredStar, setHoveredStar] = useState(0);
   const [watchedDate, setWatchedDate] = useState('');
   const [errorModal, setErrorModal] = useState<{ show: boolean; message: string }>({
     show: false,
@@ -33,8 +33,8 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
   // Reset form when modal closes
   useEffect(() => {
     if (!show) {
-      setRating('');
-      setReview('');
+      setRating(0);
+      setHoveredStar(0);
       setWatchedDate('');
     }
   }, [show]);
@@ -42,21 +42,46 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
   const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (rating === 0) {
+      setErrorModal({ show: true, message: 'Please select a rating' });
+      return;
+    }
+
     try {
       await ratingAPI.createRating({
         movieId: movie!.id,
-        rating: parseFloat(rating),
-        review,
+        rating: rating * 2, // Convert 5-star to 10-point scale
         watchedDate,
       });
       setSuccessModal({ show: true, message: 'Rating submitted successfully!' });
-      setRating('');
-      setReview('');
+      setRating(0);
+      setHoveredStar(0);
       setWatchedDate('');
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
       setErrorModal({ show: true, message: error.response?.data?.error || 'Failed to submit rating' });
     }
+  };
+
+  const renderStars = () => {
+    return (
+      <div style={{ fontSize: '2rem', cursor: 'pointer' }}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHoveredStar(star)}
+            onMouseLeave={() => setHoveredStar(0)}
+            style={{
+              color: star <= (hoveredStar || rating) ? '#ffc107' : '#e4e5e9',
+              marginRight: '0.25rem',
+            }}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
   };
 
   if (!show || !movie) return null;
@@ -193,36 +218,25 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                   <Card.Body>
                     <h5>Rate This Movie</h5>
                     <Form onSubmit={handleRatingSubmit}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Rating (0-10)</Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="0"
-                          max="10"
-                          step="0.1"
-                          value={rating}
-                          onChange={(e) => setRating(e.target.value)}
-                          required
-                        />
-                      </Form.Group>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Review (Optional)</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          value={review}
-                          onChange={(e) => setReview(e.target.value)}
-                        />
-                      </Form.Group>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Watched Date</Form.Label>
-                        <Form.Control
-                          type="date"
-                          value={watchedDate}
-                          onChange={(e) => setWatchedDate(e.target.value)}
-                          required
-                        />
-                      </Form.Group>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Rating</Form.Label>
+                            {renderStars()}
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Watched Date</Form.Label>
+                            <Form.Control
+                              type="date"
+                              value={watchedDate}
+                              onChange={(e) => setWatchedDate(e.target.value)}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
                       <Button variant="primary" type="submit">
                         Submit Rating
                       </Button>
@@ -231,24 +245,23 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 </Card>
               )}
 
-              {/* User Ratings */}
-              <h5 className="mt-4">User Ratings</h5>
-              {movie.userRatings?.length === 0 ? (
-                <p className="text-muted">No user ratings yet</p>
-              ) : (
-                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                  {movie.userRatings?.map((userRating: UserRating) => (
-                    <Card key={userRating.id} className="mb-2">
-                      <Card.Body>
-                        <div className="d-flex justify-content-between">
-                          <strong>{userRating.user.username}</strong>
-                          <Badge bg="primary">{userRating.rating}/10</Badge>
-                        </div>
-                        {userRating.review && <p className="mt-2 mb-0">{userRating.review}</p>}
-                      </Card.Body>
-                    </Card>
-                  ))}
-                </div>
+              {/* User Ratings - Only show if there are ratings */}
+              {movie.userRatings && movie.userRatings.length > 0 && (
+                <>
+                  <h5 className="mt-4">User Ratings</h5>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {movie.userRatings.map((userRating: UserRating) => (
+                      <Card key={userRating.id} className="mb-2">
+                        <Card.Body>
+                          <div className="d-flex justify-content-between">
+                            <strong>{userRating.user.username}</strong>
+                            <Badge bg="primary">{userRating.rating}/10</Badge>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    ))}
+                  </div>
+                </>
               )}
             </Col>
           </Row>

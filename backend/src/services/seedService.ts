@@ -21,7 +21,7 @@ export const seedAdminUser = async (): Promise<void> => {
     });
 
     if (existingAdmin) {
-      logger.info('✅ Admin user already exists');
+      logger.info('Admin user already exists');
       return;
     }
 
@@ -38,13 +38,13 @@ export const seedAdminUser = async (): Promise<void> => {
       },
     });
 
-    logger.info('✅ Admin user created successfully');
+    logger.info('Admin user created successfully');
     logger.info(`   Email: ${admin.email}`);
     logger.info(`   Username: ${admin.username}`);
     logger.info(`   Default Password: ${adminPassword}`);
-    logger.info('   ⚠️  Please change the default password after first login');
+    logger.info('   WARNING: Please change the default password after first login');
   } catch (error) {
-    logger.error('❌ Error seeding admin user:', error);
+    logger.error('Error seeding admin user:', error);
     throw error;
   }
 };

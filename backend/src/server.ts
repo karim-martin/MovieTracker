@@ -15,32 +15,32 @@ const initializeServer = async () => {
   try {
     // Test database connection
     await prisma.$connect();
-    logger.info('✅ Database connected successfully');
+    logger.info('Database connected successfully');
 
     // Seed admin user
     await seedAdminUser();
 
     // Start server
     app.listen(PORT, () => {
-      logger.info(`🚀 Server is running on port ${PORT}`);
-      logger.info(`📍 Health check: http://localhost:${PORT}/health`);
-      logger.info(`📍 API Base URL: http://localhost:${PORT}/api`);
+      logger.info(`Server is running on port ${PORT}`);
+      logger.info(`Health check: http://localhost:${PORT}/health`);
+      logger.info(`API Base URL: http://localhost:${PORT}/api`);
     });
   } catch (error) {
-    logger.error('❌ Failed to start server:', error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
 // Handle shutdown gracefully
 process.on('SIGINT', async () => {
-  logger.info('\n👋 Shutting down gracefully...');
+  logger.info('\nShutting down gracefully...');
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-  logger.info('\n👋 Shutting down gracefully...');
+  logger.info('\nShutting down gracefully...');
   await prisma.$disconnect();
   process.exit(0);
 });

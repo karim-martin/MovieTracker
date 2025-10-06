@@ -12,7 +12,7 @@ export const createRating = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    const { movieId, rating, review, watchedDate } = req.body;
+    const { movieId, rating, watchedDate } = req.body;
     const userId = req.user.userId;
 
     // Check if user already rated this movie
@@ -35,7 +35,6 @@ export const createRating = async (req: AuthRequest, res: Response): Promise<voi
         movieId,
         userId,
         rating: parseFloat(rating),
-        review,
         watchedDate: new Date(watchedDate),
       },
       include: {
@@ -120,7 +119,7 @@ export const updateRating = async (req: AuthRequest, res: Response): Promise<voi
     }
 
     const { id } = req.params;
-    const { rating, review, watchedDate } = req.body;
+    const { rating, watchedDate } = req.body;
 
     // Verify ownership
     const existingRating = await prisma.userRating.findUnique({
@@ -141,7 +140,6 @@ export const updateRating = async (req: AuthRequest, res: Response): Promise<voi
       where: { id },
       data: {
         ...(rating && { rating: parseFloat(rating) }),
-        ...(review !== undefined && { review }),
         ...(watchedDate && { watchedDate: new Date(watchedDate) }),
       },
       include: {

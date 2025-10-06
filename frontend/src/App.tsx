@@ -11,8 +11,6 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import MyMovies from './pages/MyMovies';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminMovies from './pages/AdminMovies';
-import AdminUsers from './pages/AdminUsers';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function AppContent() {
@@ -26,8 +24,6 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/my-movies" element={   <ProtectedRoute>     <MyMovies />   </ProtectedRoute> }/>
           <Route path="/admin" element={ <AdminRoute> <AdminDashboard /> </AdminRoute>}/>
-          <Route path="/admin/movies" element={   <AdminRoute>     <AdminMovies />   </AdminRoute> }/>
-          <Route path="/admin/users" element={   <AdminRoute>     <AdminUsers />   </AdminRoute> }/>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>

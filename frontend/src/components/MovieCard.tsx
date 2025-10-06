@@ -18,7 +18,16 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails }) =>
         />
       )}
       <Card.Body>
-        <Card.Title>{movie.title}</Card.Title>
+        <Card.Title style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          minHeight: '3rem'
+        }}>
+          {movie.title}
+        </Card.Title>
         <Card.Text className="text-muted">{movie.releaseYear}</Card.Text>
         <div className="mb-2">
           {movie.genres?.map((mg: MovieGenre) => (

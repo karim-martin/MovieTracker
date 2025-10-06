@@ -37,7 +37,6 @@ export default function MyMovies() {
                   <th>Year</th>
                   <th>My Rating</th>
                   <th>Watched Date</th>
-                  <th>Review</th>
                 </tr>
               </thead>
               <tbody>
@@ -51,7 +50,6 @@ export default function MyMovies() {
                       <Badge bg="primary">{rating.rating}/10</Badge>
                     </td>
                     <td>{new Date(rating.watchedDate).toLocaleDateString()}</td>
-                    <td>{rating.review || <span className="text-muted">No review</span>}</td>
                   </tr>
                 ))}
               </tbody>

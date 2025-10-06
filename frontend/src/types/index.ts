@@ -59,7 +59,6 @@ export interface Credit {
 export interface UserRating {
   id: string;
   rating: number;
-  review?: string;
   watchedDate: string;
   movie: Movie;
   user: User;
@@ -68,7 +67,6 @@ export interface UserRating {
 export interface CreateRatingInput {
   movieId: string;
   rating: number;
-  review?: string;
   watchedDate: string;
 }
 

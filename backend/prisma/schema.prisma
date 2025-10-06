@@ -110,7 +110,6 @@ model UserRating {
   movieId     String
   userId      String
   rating      Float
-  review      String?
   watchedDate DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

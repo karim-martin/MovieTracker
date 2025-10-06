@@ -8,7 +8,7 @@ export const Navigation: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -25,8 +25,6 @@ export const Navigation: React.FC = () => {
                 {isAdmin && (
                   <>
                     <Nav.Link href="/admin">Admin Dashboard</Nav.Link>
-                    <Nav.Link href="/admin/movies">Manage Movies</Nav.Link>
-                    <Nav.Link href="/admin/users">Manage Users</Nav.Link>
                   </>
                 )}
                 <Nav.Link onClick={handleLogout} className="text-danger">

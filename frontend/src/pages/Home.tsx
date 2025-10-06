@@ -17,7 +17,7 @@ export default function Home() {
 
   const { isAuthenticated } = useAuth();
   const { movies, loading, error } = useMovies(searchParams);
-  const { recommendations, loading: recsLoading } = useRecommendations(10);
+  const { recommendations, loading: recsLoading } = useRecommendations(10, !isAuthenticated);
 
   const handleViewDetails = (movieId: string) => {
     const movie = [...movies, ...recommendations].find(m => m.id === movieId);
@@ -127,7 +127,7 @@ export default function Home() {
           </Col>
         ) : (
           movies.map((movie) => (
-            <Col md={4} key={movie.id} className="mb-4">
+            <Col md={3} key={movie.id} className="mb-4">
               <MovieCard movie={movie} onViewDetails={handleViewDetails} />
             </Col>
           ))

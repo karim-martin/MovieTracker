@@ -30,10 +30,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect to login if we're on a protected route and get 401
+    // Don't redirect for public pages like home
     if (error.response?.status === 401) {
+      const publicPaths = ['/', '/login', '/register'];
+      const currentPath = window.location.pathname;
+
+      // Clear invalid token/user data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      // Only redirect if we're not already on a public page
+      if (!publicPaths.includes(currentPath)) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

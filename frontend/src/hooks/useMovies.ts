@@ -78,13 +78,19 @@ interface UseRecommendationsResult {
   refetch: () => Promise<void>;
 }
 
-export const useRecommendations = (limit?: number): UseRecommendationsResult => {
+export const useRecommendations = (limit?: number, skip?: boolean): UseRecommendationsResult => {
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
   const fetchRecommendations = useCallback(async () => {
+    if (skip) {
+      setRecommendations([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
@@ -101,7 +107,7 @@ export const useRecommendations = (limit?: number): UseRecommendationsResult => 
     } finally {
       setLoading(false);
     }
-  }, [limit]);
+  }, [limit, skip]);
 
   useEffect(() => {
     fetchRecommendations();
