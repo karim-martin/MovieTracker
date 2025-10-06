@@ -30,8 +30,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only redirect to login if we're on a protected route and get 401
-    // Don't redirect for public pages like home
     if (error.response?.status === 401) {
       const publicPaths = ['/', '/login', '/register'];
       const currentPath = window.location.pathname;
@@ -51,10 +49,8 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  register: (data: RegisterInput): Promise<AxiosResponse<AuthResponse>> =>
-    api.post('/auth/register', data),
-  login: (data: LoginInput): Promise<AxiosResponse<AuthResponse>> =>
-    api.post('/auth/login', data),
+  register: (data: RegisterInput): Promise<AxiosResponse<AuthResponse>> => api.post('/auth/register', data),
+  login: (data: LoginInput): Promise<AxiosResponse<AuthResponse>> => api.post('/auth/login', data),
   getMe: (): Promise<AxiosResponse> => api.get('/auth/me'),
   logout: (): Promise<AxiosResponse> => api.post('/auth/logout'),
 };
@@ -70,45 +66,34 @@ export const userAPI = {
 
 // Movie API
 export const movieAPI = {
-  getAllMovies: (params?: MovieSearchParams): Promise<AxiosResponse<MoviesResponse>> =>
-    api.get('/movies', { params }),
-  getMovieById: (id: string): Promise<AxiosResponse<{ movie: Movie }>> =>
-    api.get(`/movies/${id}`),
-  getRecommendations: (limit?: number): Promise<AxiosResponse<{ recommendations: Movie[]; message: string }>> =>
-    api.get('/movies/recommendations', { params: { limit } }),
-  createMovie: (data: Partial<Movie>): Promise<AxiosResponse> =>
-    api.post('/movies', data),
-  updateMovie: (id: string, data: Partial<Movie>): Promise<AxiosResponse> =>
-    api.put(`/movies/${id}`, data),
+  getAllMovies: (params?: MovieSearchParams): Promise<AxiosResponse<MoviesResponse>> => api.get('/movies', { params }),
+  getMovieById: (id: string): Promise<AxiosResponse<{ movie: Movie }>> => api.get(`/movies/${id}`),
+  getRecommendations: (limit?: number): Promise<AxiosResponse<{ recommendations: Movie[]; message: string }>> => api.get('/movies/recommendations', { params: { limit } }),
+  createMovie: (data: Partial<Movie>): Promise<AxiosResponse> => api.post('/movies', data),
+  updateMovie: (id: string, data: Partial<Movie>): Promise<AxiosResponse> => api.put(`/movies/${id}`, data),
   deleteMovie: (id: string): Promise<AxiosResponse> => api.delete(`/movies/${id}`),
 };
 
 // Genre API
 export const genreAPI = {
   getAllGenres: (): Promise<AxiosResponse<GenresResponse>> => api.get('/genres'),
-  createGenre: (data: { name: string }): Promise<AxiosResponse> =>
-    api.post('/genres', data),
+  createGenre: (data: { name: string }): Promise<AxiosResponse> => api.post('/genres', data),
   deleteGenre: (id: string): Promise<AxiosResponse> => api.delete(`/genres/${id}`),
 };
 
 // Person API
 export const personAPI = {
-  getAllPeople: (params?: PersonSearchParams): Promise<AxiosResponse> =>
-    api.get('/people', { params }),
-  createPerson: (data: { name: string; type: string }): Promise<AxiosResponse> =>
-    api.post('/people', data),
+  getAllPeople: (params?: PersonSearchParams): Promise<AxiosResponse> => api.get('/people', { params }),
+  createPerson: (data: { name: string; type: string }): Promise<AxiosResponse> => api.post('/people', data),
   deletePerson: (id: string): Promise<AxiosResponse> => api.delete(`/people/${id}`),
 };
 
 // Rating API
 export const ratingAPI = {
-  createRating: (data: CreateRatingInput): Promise<AxiosResponse> =>
-    api.post('/ratings', data),
+  createRating: (data: CreateRatingInput): Promise<AxiosResponse> => api.post('/ratings', data),
   getMyRatings: (): Promise<AxiosResponse<RatingsResponse>> => api.get('/ratings/my'),
-  getRatingByMovie: (movieId: string): Promise<AxiosResponse> =>
-    api.get(`/ratings/movie/${movieId}`),
-  updateRating: (id: string, data: Partial<CreateRatingInput>): Promise<AxiosResponse> =>
-    api.put(`/ratings/${id}`, data),
+  getRatingByMovie: (movieId: string): Promise<AxiosResponse> => api.get(`/ratings/movie/${movieId}`),
+  updateRating: (id: string, data: Partial<CreateRatingInput>): Promise<AxiosResponse> => api.put(`/ratings/${id}`, data),
   deleteRating: (id: string): Promise<AxiosResponse> => api.delete(`/ratings/${id}`),
 };
 

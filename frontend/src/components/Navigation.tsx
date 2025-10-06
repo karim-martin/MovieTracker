@@ -27,9 +27,7 @@ export const Navigation: React.FC = () => {
                     <Nav.Link href="/admin">Admin Dashboard</Nav.Link>
                   </>
                 )}
-                <Nav.Link onClick={handleLogout} className="text-danger">
-                  Logout ({user?.username})
-                </Nav.Link>
+                <Nav.Link onClick={handleLogout} className="text-danger"> Logout ({user?.username}) </Nav.Link>
               </>
             ) : (
               <>

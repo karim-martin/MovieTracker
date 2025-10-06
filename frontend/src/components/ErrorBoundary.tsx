@@ -1,14 +1,8 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { Modal, Button, Container } from 'react-bootstrap';
 
-interface Props {
-  children: ReactNode;
-}
-
-interface State {
-  hasError: boolean;
-  error?: Error;
-}
+interface Props { children: ReactNode; }
+interface State { hasError: boolean; error?: Error;}
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
@@ -25,7 +19,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.setState({ hasError: false, error: undefined });
-    // Reload the page to reset the application state
     window.location.replace('/');
   };
 
@@ -38,20 +31,12 @@ export class ErrorBoundary extends Component<Props, State> {
               <Modal.Title>Application Error</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <p className="mb-0">
-                <strong>Something went wrong:</strong>
-              </p>
-              <p className="text-muted mt-2">
-                {this.state.error?.message || 'An unexpected error occurred'}
-              </p>
-              <p className="mt-3 mb-0">
-                The application will be reset when you close this dialog.
-              </p>
+              <p className="mb-0"> <strong>Something went wrong:</strong> </p>
+              <p className="text-muted mt-2"> {this.state.error?.message || 'An unexpected error occurred'} </p>
+              <p className="mt-3 mb-0"> The application will be reset when you close this dialog. </p>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="danger" onClick={this.handleReset}>
-                Reset Application
-              </Button>
+              <Button variant="danger" onClick={this.handleReset}> Reset Application </Button>
             </Modal.Footer>
           </Modal>
         </Container>

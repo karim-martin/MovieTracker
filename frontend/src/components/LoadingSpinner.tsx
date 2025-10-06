@@ -1,9 +1,6 @@
 import { Spinner } from 'react-bootstrap';
 
-interface LoadingSpinnerProps {
-  message?: string;
-  centered?: boolean;
-}
+interface LoadingSpinnerProps { message?: string; centered?: boolean; }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = 'Loading...',

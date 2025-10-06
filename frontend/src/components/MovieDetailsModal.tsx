@@ -5,11 +5,7 @@ import { useAuth } from '../AuthContext';
 import { ratingAPI } from '../services/api';
 import { Movie, Credit, MovieGenre, ExternalRating, UserRating } from '../types';
 
-interface MovieDetailsModalProps {
-  show: boolean;
-  movie: Movie | null;
-  onClose: () => void;
-}
+interface MovieDetailsModalProps { show: boolean; movie: Movie | null; onClose: () => void; }
 
 export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
   show,

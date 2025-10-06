@@ -40,9 +40,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
-        <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onClose}>
-          {closeText}
-        </Button>
+        <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onClose}> {closeText} </Button>
       </Modal.Footer>
     </Modal>
   );
