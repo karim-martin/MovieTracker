@@ -216,13 +216,13 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                     <Form onSubmit={handleRatingSubmit}>
                       <Row>
                         <Col md={6}>
-                          <Form.Group className="mb-3">
+                          <Form.Group className="mb-3" controlId="rating">
                             <Form.Label>Rating</Form.Label>
                             {renderStars()}
                           </Form.Group>
                         </Col>
                         <Col md={6}>
-                          <Form.Group className="mb-3">
+                          <Form.Group className="mb-3" controlId="watchedDate">
                             <Form.Label>Watched Date</Form.Label>
                             <Form.Control
                               type="date"
