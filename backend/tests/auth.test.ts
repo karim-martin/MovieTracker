@@ -28,7 +28,7 @@ describe('Authentication Tests', () => {
         .send({
           email: 'test@example.com',
           username: 'testuser',
-          password: 'Test123',
+          password: 'Test12345',
         });
 
       expect(response.status).toBe(201);
@@ -43,7 +43,7 @@ describe('Authentication Tests', () => {
         .send({
           email: 'test2@example.com',
           username: 'testuser2',
-          password: 'Test123',
+          password: 'Test12345',
         });
 
       const response = await request(app)
@@ -51,7 +51,7 @@ describe('Authentication Tests', () => {
         .send({
           email: 'test2@example.com',
           username: 'different',
-          password: 'Test123',
+          password: 'Test12345',
         });
 
       expect(response.status).toBe(400);
@@ -64,7 +64,7 @@ describe('Authentication Tests', () => {
         .send({
           email: 'invalid-email',
           username: 'testuser3',
-          password: 'Test123',
+          password: 'Test12345',
         });
 
       expect(response.status).toBe(400);
@@ -90,7 +90,7 @@ describe('Authentication Tests', () => {
         .send({
           email: 'login-test@example.com',
           username: 'loginuser',
-          password: 'Login123',
+          password: 'Login12345',
         });
     });
 
@@ -99,7 +99,7 @@ describe('Authentication Tests', () => {
         .post('/api/auth/login')
         .send({
           email: 'login-test@example.com',
-          password: 'Login123',
+          password: 'Login12345',
         });
 
       expect(response.status).toBe(200);
@@ -139,7 +139,7 @@ describe('Authentication Tests', () => {
         .send({
           email: 'me-test@example.com',
           username: 'meuser',
-          password: 'Test123',
+          password: 'Test12345',
         });
       token = response.body.token;
     });
@@ -165,6 +165,176 @@ describe('Authentication Tests', () => {
         .set('Authorization', 'Bearer invalid-token');
 
       expect(response.status).toBe(401);
+    });
+  });
+
+  describe('POST /api/auth/logout', () => {
+    let token: string;
+
+    beforeAll(async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'logout-test@example.com',
+          username: 'logoutuser',
+          password: 'Logout123',
+        });
+      token = response.body.token;
+    });
+
+    it('should logout successfully with valid token', async () => {
+      const response = await request(app)
+        .post('/api/auth/logout')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should fail without token', async () => {
+      const response = await request(app).post('/api/auth/logout');
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should fail with invalid token', async () => {
+      const response = await request(app)
+        .post('/api/auth/logout')
+        .set('Authorization', 'Bearer invalid-token');
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('Input Validation - Register', () => {
+    it('should fail with password less than 8 characters', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'shortpass@example.com',
+          username: 'shortpass',
+          password: 'Test12',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Validation failed');
+    });
+
+    it('should fail with password without numbers', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'nonum@example.com',
+          username: 'nonum',
+          password: 'TestPassword',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Validation failed');
+    });
+
+    it('should fail with password without letters', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'noletter@example.com',
+          username: 'noletter',
+          password: '12345678',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Validation failed');
+    });
+
+    it('should fail with username less than 3 characters', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'shortuser@example.com',
+          username: 'ab',
+          password: 'Test12345',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Validation failed');
+    });
+
+    it('should fail with missing email', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'noemail',
+          password: 'Test12345',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should fail with missing username', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'nouser@example.com',
+          password: 'Test12345',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should fail with missing password', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'nopass@example.com',
+          username: 'nopass',
+        });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('Input Validation - Login', () => {
+    it('should fail with invalid email format', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'not-an-email',
+          password: 'Password123',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Validation failed');
+    });
+
+    it('should fail with missing email', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          password: 'Password123',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should fail with missing password', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should fail with empty password', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+          password: '',
+        });
+
+      expect(response.status).toBe(400);
     });
   });
 });
