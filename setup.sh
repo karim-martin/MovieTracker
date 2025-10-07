@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # MovieTracker Setup Script
-# This script installs dependencies and sets up the database
 
 echo "Setting up MovieTracker..."
 
