@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Row, Col, Table, Button, Modal, Form, Badge, Pagination, Spinner, Alert } from 'react-bootstrap';
 import { movieAPI, genreAPI, personAPI, tmdbAPI } from '../services/api';
 import { useUsers } from '../hooks';
-import { Movie, APIError, User, Genre, Person } from '../types';
+import { Movie, APIError, User, Genre, Person, MoviePayload } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { MessageModal } from '../components/MessageModal';
@@ -16,6 +16,15 @@ interface MovieFormData {
   directors: { personId: string; name: string }[];
   producers: { personId: string; name: string }[];
   cast: { personId: string; name: string; characterName: string }[];
+}
+
+interface TMDBMovie {
+  tmdbId: number;
+  title: string;
+  releaseYear: number;
+  plot?: string;
+  posterUrl?: string;
+  rating?: number;
 }
 
 export default function AdminDashboard() {
@@ -47,7 +56,7 @@ export default function AdminDashboard() {
   // TMDB Import state
   const [showTMDBModal, setShowTMDBModal] = useState(false);
   const [tmdbSearchQuery, setTmdbSearchQuery] = useState('');
-  const [tmdbMovies, setTmdbMovies] = useState<any[]>([]);
+  const [tmdbMovies, setTmdbMovies] = useState<TMDBMovie[]>([]);
   const [tmdbLoading, setTmdbLoading] = useState(false);
   const [importingMovies, setImportingMovies] = useState<Set<number>>(new Set());
   const [bulkImporting, setBulkImporting] = useState(false);
@@ -127,7 +136,7 @@ export default function AdminDashboard() {
         ...formData.cast.map(c => ({ personId: c.personId, role: 'actor', characterName: c.characterName })),
       ];
 
-      const movieData = {
+      const movieData: MoviePayload = {
         title: formData.title,
         releaseYear: Number(formData.releaseYear),
         plot: formData.plot,
@@ -890,15 +899,15 @@ export default function AdminDashboard() {
                     placeholder="Enter movie title..."
                     value={tmdbSearchQuery}
                     onChange={(e) => setTmdbSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearchTMDB()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearchTMDB()}
                   />
                 </Form.Group>
               </Col>
               <Col md={4} className="d-flex align-items-end gap-2">
-                <Button variant="primary" onClick={handleSearchTMDB} disabled={tmdbLoading}>
+                <Button variant="primary" onClick={() => handleSearchTMDB()} disabled={tmdbLoading}>
                   {tmdbLoading ? <Spinner animation="border" size="sm" /> : 'Search'}
                 </Button>
-                <Button variant="info" onClick={handleLoadPopular} disabled={tmdbLoading}>
+                <Button variant="info" onClick={() => handleLoadPopular()} disabled={tmdbLoading}>
                   Browse Movies
                 </Button>
               </Col>

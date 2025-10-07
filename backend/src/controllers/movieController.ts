@@ -156,7 +156,7 @@ export const getMovieById = async (req: AuthRequest, res: Response): Promise<voi
 export const updateMovie = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, releaseYear, plot, posterUrl } = req.body;
+    const { title, releaseYear, plot, posterUrl, genres, credits } = req.body;
 
     const movie = await prisma.movie.update({
       where: { id },
@@ -173,11 +173,39 @@ export const updateMovie = async (req: AuthRequest, res: Response): Promise<void
       },
     });
 
+    // Update genres if provided
+    if (genres && Array.isArray(genres)) {
+      // Delete existing genres
+      await prisma.movieGenre.deleteMany({ where: { movieId: id } });
+      // Add new genres
+      await Promise.all(genres.map((genreId: string) => prisma.movieGenre.create({ data: { movieId: id, genreId }})));
+    }
+
+    // Update credits if provided
+    if (credits && Array.isArray(credits)) {
+      // Delete existing credits
+      await prisma.movieCredit.deleteMany({ where: { movieId: id } });
+      // Add new credits
+      await Promise.all(credits.map((credit: any) => prisma.movieCredit.create({
+        data: { movieId: id, personId: credit.personId, role: credit.role, characterName: credit.characterName } })));
+    }
+
+    // Fetch updated movie with all relationships
+    const fullMovie = await prisma.movie.findUnique({
+      where: { id },
+      include: {
+        genres: { include: { genre: true } },
+        credits: { include: { person: true } },
+        externalRatings: true,
+      },
+    });
+
     res.status(200).json({
       message: 'Movie updated successfully',
-      movie,
+      movie: fullMovie,
     });
   } catch (error) {
+    logger.error('Update movie error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

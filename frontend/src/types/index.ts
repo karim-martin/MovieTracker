@@ -56,6 +56,20 @@ export interface Credit {
   characterName?: string;
 }
 
+// Movie Create/Update Payload
+export interface MoviePayload {
+  title: string;
+  releaseYear: number;
+  plot: string;
+  posterUrl: string;
+  genres: string[];
+  credits: Array<{
+    personId: string;
+    role: string;
+    characterName?: string;
+  }>;
+}
+
 // Rating Types
 export interface UserRating {
   id: string;

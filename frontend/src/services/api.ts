@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { LoginInput, RegisterInput, AuthResponse, MoviesResponse, UsersResponse, MovieSearchParams, CreateRatingInput,
-  RatingsResponse, GenresResponse, PersonSearchParams, Movie, WatchStatus, CreateWatchStatusInput} from '../types';
+  RatingsResponse, GenresResponse, PersonSearchParams, Movie, WatchStatus, CreateWatchStatusInput, MoviePayload} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -69,8 +69,8 @@ export const movieAPI = {
   getAllMovies: (params?: MovieSearchParams): Promise<AxiosResponse<MoviesResponse>> => api.get('/movies', { params }),
   getMovieById: (id: string): Promise<AxiosResponse<{ movie: Movie }>> => api.get(`/movies/${id}`),
   getRecommendations: (limit?: number): Promise<AxiosResponse<{ recommendations: Movie[]; message: string }>> => api.get('/movies/recommendations', { params: { limit } }),
-  createMovie: (data: Partial<Movie>): Promise<AxiosResponse> => api.post('/movies', data),
-  updateMovie: (id: string, data: Partial<Movie>): Promise<AxiosResponse> => api.put(`/movies/${id}`, data),
+  createMovie: (data: MoviePayload): Promise<AxiosResponse> => api.post('/movies', data),
+  updateMovie: (id: string, data: MoviePayload): Promise<AxiosResponse> => api.put(`/movies/${id}`, data),
   deleteMovie: (id: string): Promise<AxiosResponse> => api.delete(`/movies/${id}`),
 };
 
