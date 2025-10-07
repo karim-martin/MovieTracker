@@ -42,6 +42,26 @@ export const createRating = async (req: AuthRequest, res: Response): Promise<voi
       },
     });
 
+    // Auto-create/update watch status when user rates a movie
+    await prisma.watchStatus.upsert({
+      where: {
+        movieId_userId: {
+          movieId,
+          userId,
+        },
+      },
+      update: {
+        watched: true,
+        watchedDate: new Date(watchedDate),
+      },
+      create: {
+        movieId,
+        userId,
+        watched: true,
+        watchedDate: new Date(watchedDate),
+      },
+    });
+
     res.status(201).json({
       message: 'Rating created successfully',
       rating: userRating,

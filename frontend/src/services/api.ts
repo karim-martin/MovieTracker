@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-import { LoginInput, RegisterInput, AuthResponse, MoviesResponse, UsersResponse, MovieSearchParams, CreateRatingInput, 
-  RatingsResponse, GenresResponse, PersonSearchParams, Movie} from '../types';
+import { LoginInput, RegisterInput, AuthResponse, MoviesResponse, UsersResponse, MovieSearchParams, CreateRatingInput,
+  RatingsResponse, GenresResponse, PersonSearchParams, Movie, WatchStatus, CreateWatchStatusInput} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -95,6 +95,32 @@ export const ratingAPI = {
   getRatingByMovie: (movieId: string): Promise<AxiosResponse> => api.get(`/ratings/movie/${movieId}`),
   updateRating: (id: string, data: Partial<CreateRatingInput>): Promise<AxiosResponse> => api.put(`/ratings/${id}`, data),
   deleteRating: (id: string): Promise<AxiosResponse> => api.delete(`/ratings/${id}`),
+};
+
+// Watch Status API
+export const watchStatusAPI = {
+  toggleWatchStatus: (movieId: string, data?: CreateWatchStatusInput): Promise<AxiosResponse<{ watchStatus: WatchStatus }>> =>
+    api.post(`/watch-status/${movieId}`, data || {}),
+  getWatchStatus: (movieId: string): Promise<AxiosResponse<{ watchStatus: WatchStatus | null }>> =>
+    api.get(`/watch-status/${movieId}`),
+  getMyWatchedMovies: (): Promise<AxiosResponse<MoviesResponse>> =>
+    api.get('/watch-status/my'),
+  deleteWatchStatus: (movieId: string): Promise<AxiosResponse> =>
+    api.delete(`/watch-status/${movieId}`),
+};
+
+// TMDB API (Admin only)
+export const tmdbAPI = {
+  searchMovies: (query: string, page?: number): Promise<AxiosResponse> =>
+    api.get('/tmdb/search', { params: { query, page } }),
+  getPopular: (page?: number): Promise<AxiosResponse> =>
+    api.get('/tmdb/popular', { params: { page } }),
+  getMovieDetails: (tmdbId: number): Promise<AxiosResponse> =>
+    api.get(`/tmdb/movie/${tmdbId}`),
+  importMovie: (tmdbId: number): Promise<AxiosResponse> =>
+    api.post('/tmdb/import', { tmdbId }),
+  bulkImport: (): Promise<AxiosResponse> =>
+    api.post('/tmdb/import/bulk'),
 };
 
 export default api;

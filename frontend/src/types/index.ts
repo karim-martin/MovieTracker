@@ -23,6 +23,7 @@ export interface Movie {
   externalRatings?: ExternalRating[];
   credits?: Credit[];
   userRatings?: UserRating[];
+  watchStatus?: WatchStatus;
 }
 
 export interface Genre {
@@ -68,6 +69,22 @@ export interface CreateRatingInput {
   movieId: string;
   rating: number;
   watchedDate: string;
+}
+
+// Watch Status Types
+export interface WatchStatus {
+  id: string;
+  movieId: string;
+  userId: string;
+  watched: boolean;
+  watchedDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateWatchStatusInput {
+  watched?: boolean;
+  watchedDate?: string;
 }
 
 // Auth Types

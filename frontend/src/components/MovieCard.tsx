@@ -1,12 +1,40 @@
+import { useState } from 'react';
 import { Card, Badge, Button } from 'react-bootstrap';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Movie, MovieGenre, ExternalRating } from '../types';
+import { watchStatusAPI } from '../services/api';
+import { useAuth } from '../services/AuthContext';
 
 interface MovieCardProps {
   movie: Movie;
   onViewDetails?: (movieId: string) => void;
+  onWatchStatusChange?: () => void;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails }) => {
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails, onWatchStatusChange }) => {
+  const { isAuthenticated } = useAuth();
+  const [isWatched, setIsWatched] = useState(movie.watchStatus?.watched ?? false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleWatchToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated || isLoading) return;
+
+    setIsLoading(true);
+    try {
+      await watchStatusAPI.toggleWatchStatus(movie.id, {
+        watched: !isWatched,
+        watchedDate: !isWatched ? new Date().toISOString() : undefined
+      });
+      setIsWatched(!isWatched);
+      onWatchStatusChange?.();
+    } catch (error) {
+      console.error('Failed to toggle watch status:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card>
       {movie.posterUrl && (
@@ -31,7 +59,23 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails }) =>
             </Badge>
           </div>
         ))}
-        <Button variant="dark" size="sm" className="mt-2" onClick={() => onViewDetails?.(movie.id)}> View Details </Button>
+        <div className="d-flex gap-2 mt-2">
+          {isAuthenticated && (
+            <Button
+              variant={isWatched ? 'success' : 'outline-secondary'}
+              size="sm"
+              onClick={handleWatchToggle}
+              disabled={isLoading}
+              className="d-flex align-items-center gap-1"
+            >
+              {isWatched ? <FaEye /> : <FaEyeSlash />}
+              {isWatched ? 'Watched' : 'Watch'}
+            </Button>
+          )}
+          <Button variant="dark" size="sm" onClick={() => onViewDetails?.(movie.id)} className="flex-grow-1">
+            View Details
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   );

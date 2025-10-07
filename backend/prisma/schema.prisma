@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id        String       @id @default(uuid())
-  email     String       @unique
-  username  String       @unique
-  password  String
-  role      Role         @default(USER)
-  isBlocked Boolean      @default(false)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  ratings   UserRating[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  username     String        @unique
+  password     String
+  role         Role          @default(USER)
+  isBlocked    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  ratings      UserRating[]
+  watchStatuses WatchStatus[]
 
   @@map("users")
 }
@@ -32,12 +33,14 @@ model Movie {
   releaseYear     Int
   plot            String?
   posterUrl       String?
+  tmdbId          Int?              @unique
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   genres          MovieGenre[]
   credits         MovieCredit[]
   externalRatings ExternalRating[]
   userRatings     UserRating[]
+  watchStatuses   WatchStatus[]
 
   @@map("movies")
 }
@@ -118,4 +121,19 @@ model UserRating {
 
   @@unique([movieId, userId])
   @@map("user_ratings")
+}
+
+model WatchStatus {
+  id          String   @id @default(uuid())
+  movieId     String
+  userId      String
+  watched     Boolean  @default(true)
+  watchedDate DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  movie       Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, userId])
+  @@map("watch_statuses")
 }

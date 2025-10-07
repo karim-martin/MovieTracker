@@ -87,64 +87,22 @@ export const createMovie = async (req: AuthRequest, res: Response): Promise<void
 
 export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Response | void> => {
   try {
-    const { title, genre, source = 'tmdb', page = '1' } = req.query;
+    const { title, genre, person, page = '1', limit = '20' } = req.query;
     const pageNum = parseInt(page as string);
-
-    // If searching by title or source is TMDB, fetch from TMDB
-    if (source === 'tmdb' || title) {
-      let tmdbResults;
-
-      if (title) {
-        // Search TMDB by title
-        tmdbResults = await tmdbService.searchMovies(title as string, pageNum);
-      } else if (genre) {
-        // Get TMDB genres first, find matching genre ID
-        const genres = await tmdbService.getGenres();
-        const matchedGenre = genres.find(g =>
-          g.name.toLowerCase().includes((genre as string).toLowerCase())
-        );
-
-        if (matchedGenre) {
-          tmdbResults = await tmdbService.discoverByGenre(matchedGenre.id, pageNum);
-        } else {
-          tmdbResults = await tmdbService.getPopularMovies(pageNum);
-        }
-      } else {
-        // Get popular movies by default
-        tmdbResults = await tmdbService.getPopularMovies(pageNum);
-      }
-
-      // Format TMDB results with image URLs
-      const movies = tmdbResults.results.map((movie) => ({
-        id: movie.id.toString(),
-        tmdbId: movie.id,
-        title: movie.title,
-        releaseYear: new Date(movie.release_date).getFullYear(),
-        plot: movie.overview,
-        posterUrl: tmdbService.getPosterUrl(movie.poster_path),
-        backdropUrl: tmdbService.getBackdropUrl(movie.backdrop_path),
-        rating: movie.vote_average,
-        voteCount: movie.vote_count,
-        source: 'tmdb' as const,
-      }));
-
-      return res.status(200).json({
-        movies,
-        pagination: {
-          total: tmdbResults.total_results,
-          page: pageNum,
-          totalPages: tmdbResults.total_pages,
-        },
-        source: 'tmdb',
-      });
-    }
-
-    // Otherwise, fetch from local database
-    const limitNum = 20;
+    const limitNum = parseInt(limit as string);
     const skip = (pageNum - 1) * limitNum;
 
     const where: any = {};
 
+    // Filter by title
+    if (title) {
+      where.title = {
+        contains: title as string,
+        mode: 'insensitive',
+      };
+    }
+
+    // Filter by genre
     if (genre) {
       where.genres = {
         some: {
@@ -158,6 +116,22 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Res
       };
     }
 
+    // Filter by person (actor, director, or producer)
+    if (person) {
+      where.credits = {
+        some: {
+          person: {
+            name: {
+              contains: person as string,
+              mode: 'insensitive',
+            },
+          },
+        },
+      };
+    }
+
+    const userId = req.user?.userId;
+
     const [movies, total] = await Promise.all([
       prisma.movie.findMany({
         where,
@@ -170,6 +144,9 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Res
               rating: true,
             },
           },
+          watchStatuses: userId ? {
+            where: { userId },
+          } : false,
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -178,8 +155,17 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Res
       prisma.movie.count({ where }),
     ]);
 
+    // Transform movies to include single watchStatus instead of array
+    const transformedMovies = movies.map(movie => ({
+      ...movie,
+      watchStatus: Array.isArray(movie.watchStatuses) && movie.watchStatuses.length > 0
+        ? movie.watchStatuses[0]
+        : undefined,
+      watchStatuses: undefined,
+    }));
+
     res.status(200).json({
-      movies,
+      movies: transformedMovies,
       pagination: {
         total,
         page: pageNum,
@@ -196,6 +182,7 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Res
 export const getMovieById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const userId = req.user?.userId;
 
     const movie = await prisma.movie.findUnique({
       where: { id },
@@ -213,6 +200,9 @@ export const getMovieById = async (req: AuthRequest, res: Response): Promise<voi
             },
           },
         },
+        watchStatuses: userId ? {
+          where: { userId },
+        } : false,
       },
     });
 
@@ -221,7 +211,16 @@ export const getMovieById = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    res.status(200).json({ movie });
+    // Transform to include single watchStatus
+    const transformedMovie = {
+      ...movie,
+      watchStatus: Array.isArray(movie.watchStatuses) && movie.watchStatuses.length > 0
+        ? movie.watchStatuses[0]
+        : undefined,
+      watchStatuses: undefined,
+    };
+
+    res.status(200).json({ movie: transformedMovie });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
