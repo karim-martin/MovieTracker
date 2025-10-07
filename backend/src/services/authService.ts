@@ -4,28 +4,16 @@ import { generateToken } from '../utils/jwt';
 
 const prisma = new PrismaClient();
 
-export interface RegisterInput {
-  email: string;
-  username: string;
-  password: string;
-}
-
-export interface LoginInput {
-  email: string;
-  password: string;
-}
+export interface RegisterInput { email: string; username: string; password: string;}
+export interface LoginInput { email: string; password: string;}
 
 export const hashPassword = async (password: string): Promise<string> => {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(password, salt);
 };
 
-export const comparePassword = async (
-  password: string,
-  hashedPassword: string
-): Promise<boolean> => {
-  return bcrypt.compare(password, hashedPassword);
-};
+export const comparePassword = async ( password: string, hashedPassword: string): Promise<boolean> => { 
+  return bcrypt.compare(password, hashedPassword); };
 
 export const registerUser = async (data: RegisterInput): Promise<{ user: Omit<User, 'password'>; token: string }> => {
   const existingUser = await prisma.user.findFirst({
@@ -34,26 +22,14 @@ export const registerUser = async (data: RegisterInput): Promise<{ user: Omit<Us
     },
   });
 
-  if (existingUser) {
-    throw new Error('User with this email or username already exists');
-  }
+  if (existingUser) { throw new Error('User with this email or username already exists'); }
 
   const hashedPassword = await hashPassword(data.password);
 
   const user = await prisma.user.create({
-    data: {
-      email: data.email,
-      username: data.username,
-      password: hashedPassword,
-    },
-  });
+    data: { email: data.email, username: data.username, password: hashedPassword }});
 
-  const token = generateToken({
-    userId: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
+  const token = generateToken({ userId: user.id, email: user.email, role: user.role});
   const { password: _, ...userWithoutPassword } = user;
 
   return { user: userWithoutPassword, token };

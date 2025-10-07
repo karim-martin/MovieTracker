@@ -25,14 +25,6 @@ interface RecommendationMovie {
 }
 
 export const recommendationService = {
-  /**
-   * Get personalized movie recommendations based on user's viewing history
-   * Uses a hybrid approach:
-   * 1. Analyzes user's rated movies to find preferred genres
-   * 2. Considers highly-rated movies to understand preferences
-   * 3. Fetches similar movies from TMDB based on these preferences
-   * 4. Scores and ranks recommendations
-   */
   async getRecommendations(userId: string, limit: number = 10): Promise<RecommendationMovie[]> {
     try {
       // Get user's ratings with movie details
@@ -234,7 +226,7 @@ export const recommendationService = {
         backdropUrl: null,
         rating: 0,
         voteCount: 0,
-        source: 'tmdb' as const, // Keep for compatibility, but it's from local DB
+        source: 'tmdb' as const, 
         recommendationReason: 'Popular movie you might enjoy',
       }));
     } catch (error) {
