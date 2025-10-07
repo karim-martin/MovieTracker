@@ -5,7 +5,6 @@ import { registerUser, loginUser, getUserById } from '../services/authService';
 export const register = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, username, password } = req.body;
-
     const result = await registerUser({ email, username, password });
 
     res.status(201).json({ message: 'User registered successfully', user: result.user, token: result.token });  
@@ -21,7 +20,6 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
 export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
-
     const result = await loginUser({ email, password });
 
     res.status(200).json({ message: 'Login successful', user: result.user, token: result.token });

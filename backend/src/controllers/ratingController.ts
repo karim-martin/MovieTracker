@@ -16,14 +16,7 @@ export const createRating = async (req: AuthRequest, res: Response): Promise<voi
     const userId = req.user.userId;
 
     // Check if user already rated this movie
-    const existingRating = await prisma.userRating.findUnique({
-      where: {
-        movieId_userId: {
-          movieId,
-          userId,
-        },
-      },
-    });
+    const existingRating = await prisma.userRating.findUnique({ where: { movieId_userId: { movieId, userId}}});
 
     if (existingRating) {
       res.status(400).json({ error: 'You have already rated this movie. Use update instead.' });
@@ -31,16 +24,9 @@ export const createRating = async (req: AuthRequest, res: Response): Promise<voi
     }
 
     const userRating = await prisma.userRating.create({
-      data: {
-        movieId,
-        userId,
-        rating: parseFloat(rating),
-        watchedDate: new Date(watchedDate),
-      },
-      include: {
-        movie: true,
-      },
-    });
+      data: { movieId, userId, rating: parseFloat(rating), 
+        watchedDate: new Date(watchedDate)}, 
+        include: { movie: true,  }});
 
     // Auto-create/update watch status when user rates a movie
     await prisma.watchStatus.upsert({
@@ -79,18 +65,9 @@ export const getMyRatings = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    const ratings = await prisma.userRating.findMany({
-      where: { userId: req.user.userId },
-      include: {
-        movie: {
-          include: {
-            genres: { include: { genre: true } },
-            externalRatings: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const ratings = await prisma.userRating.findMany({ where: { userId: req.user.userId }, 
+      include: { movie: { include: { genres: { include: { genre: true } }, 
+      externalRatings: true }}}, orderBy: { createdAt: 'desc' }});
 
     res.status(200).json({ ratings });
   } catch (error) {
@@ -108,17 +85,8 @@ export const getRatingByMovie = async (req: AuthRequest, res: Response): Promise
     const { movieId } = req.params;
     const userId = req.user.userId;
 
-    const rating = await prisma.userRating.findUnique({
-      where: {
-        movieId_userId: {
-          movieId,
-          userId,
-        },
-      },
-      include: {
-        movie: true,
-      },
-    });
+    const rating = await prisma.userRating.findUnique({ where: { movieId_userId: { movieId, userId},  }, 
+      include: { movie: true }});
 
     if (!rating) {
       res.status(404).json({ error: 'Rating not found' });
@@ -142,9 +110,7 @@ export const updateRating = async (req: AuthRequest, res: Response): Promise<voi
     const { rating, watchedDate } = req.body;
 
     // Verify ownership
-    const existingRating = await prisma.userRating.findUnique({
-      where: { id },
-    });
+    const existingRating = await prisma.userRating.findUnique({ where: { id } });
 
     if (!existingRating) {
       res.status(404).json({ error: 'Rating not found' });
@@ -156,21 +122,11 @@ export const updateRating = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    const updatedRating = await prisma.userRating.update({
-      where: { id },
-      data: {
-        ...(rating && { rating: parseFloat(rating) }),
-        ...(watchedDate && { watchedDate: new Date(watchedDate) }),
-      },
-      include: {
-        movie: true,
-      },
-    });
+    const updatedRating = await prisma.userRating.update({ where: { id }, 
+      data: { ...(rating && { rating: parseFloat(rating) }), ...(watchedDate && { watchedDate: new Date(watchedDate) }) }, 
+      include: { movie: true, }});
 
-    res.status(200).json({
-      message: 'Rating updated successfully',
-      rating: updatedRating,
-    });
+    res.status(200).json({ message: 'Rating updated successfully', rating: updatedRating });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -184,11 +140,7 @@ export const deleteRating = async (req: AuthRequest, res: Response): Promise<voi
     }
 
     const { id } = req.params;
-
-    // Verify ownership
-    const existingRating = await prisma.userRating.findUnique({
-      where: { id },
-    });
+    const existingRating = await prisma.userRating.findUnique({ where: { id } });
 
     if (!existingRating) {
       res.status(404).json({ error: 'Rating not found' });
@@ -200,9 +152,7 @@ export const deleteRating = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    await prisma.userRating.delete({
-      where: { id },
-    });
+    await prisma.userRating.delete({ where: { id } });
 
     res.status(200).json({ message: 'Rating deleted successfully' });
   } catch (error) {

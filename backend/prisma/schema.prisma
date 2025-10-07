@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  username     String        @unique
-  password     String
-  role         Role          @default(USER)
-  isBlocked    Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  ratings      UserRating[]
-  watchStatuses WatchStatus[]
+  id                 String        @id @default(uuid())
+  email              String        @unique
+  username           String        @unique
+  password           String
+  role               Role          @default(USER)
+  isBlocked          Boolean       @default(false)
+  failedLoginAttempts Int          @default(0)
+  lastFailedLogin    DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  ratings            UserRating[]
+  watchStatuses      WatchStatus[]
 
   @@map("users")
 }

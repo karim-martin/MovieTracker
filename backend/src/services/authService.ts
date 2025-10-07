@@ -68,14 +68,46 @@ export const loginUser = async (data: LoginInput): Promise<{ user: Omit<User, 'p
     throw new Error('Invalid email or password');
   }
 
+  // Check if account is already blocked
+  if (user.isBlocked) {
+    throw new Error('Your account has been blocked. Please contact administrator.');
+  }
+
   const isPasswordValid = await comparePassword(data.password, user.password);
 
   if (!isPasswordValid) {
+    // Increment failed login attempts
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: user.failedLoginAttempts + 1,
+        lastFailedLogin: new Date(),
+      },
+    });
+
+    // Block user if they've failed 3 or more times
+    if (updatedUser.failedLoginAttempts >= 3) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          isBlocked: true,
+        },
+      });
+      throw new Error('Your account has been blocked due to multiple failed login attempts. Please contact administrator.');
+    }
+
     throw new Error('Invalid email or password');
   }
 
-  if (user.isBlocked) {
-    throw new Error('Your account has been blocked. Please contact administrator.');
+  // Reset failed login attempts on successful login
+  if (user.failedLoginAttempts > 0) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: 0,
+        lastFailedLogin: null,
+      },
+    });
   }
 
   const token = generateToken({
