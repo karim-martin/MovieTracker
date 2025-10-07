@@ -1,6 +1,5 @@
 import logger from '../config/logger';
 import { PrismaClient } from '@prisma/client';
-import { tmdbService, TMDBMovie } from './tmdbService';
 
 const prisma = new PrismaClient();
 
@@ -58,73 +57,82 @@ export const recommendationService = {
 
       // Analyze user preferences
       const genreScores = this.calculateGenrePreferences(userRatings);
-      const averageUserRating = userRatings.reduce((sum, r) => sum + r.rating, 0) / userRatings.length;
 
       // Get top genres (at least 60% of max score)
       const maxScore = Math.max(...genreScores.map(g => g.score));
-      const topGenres = genreScores
+      const topGenreIds = genreScores
         .filter(g => g.score >= maxScore * 0.6)
         .slice(0, 3)
-        .map(g => g.genreId);
+        .map(g => g.genreId.toString());
 
       // Get movie IDs user has already rated to exclude them
-      // Note: Local movies don't have tmdbId, so this set will be empty for local movies
-      const ratedMovieIds = new Set<number>();
+      const ratedMovieIds = new Set(userRatings.map(r => r.movie.id));
 
-      // Fetch recommendations from TMDB for each top genre
-      const recommendations: RecommendationMovie[] = [];
+      // Fetch recommendations from local database based on preferred genres
+      const candidateMovies = await prisma.movie.findMany({
+        where: {
+          // Exclude already rated movies
+          id: {
+            notIn: Array.from(ratedMovieIds),
+          },
+          // Only movies in user's preferred genres
+          genres: topGenreIds.length > 0 ? {
+            some: {
+              genreId: {
+                in: topGenreIds,
+              },
+            },
+          } : undefined,
+        },
+        include: {
+          genres: {
+            include: { genre: true },
+          },
+          userRatings: true,
+          externalRatings: true,
+        },
+        take: limit * 3, // Get more candidates to filter and rank
+      });
 
-      for (const genreId of topGenres) {
-        try {
-          const tmdbResults = await tmdbService.discoverByGenre(genreId, 1);
-
-          // Filter out already rated movies and convert to our format
-          const genreRecommendations = tmdbResults.results
-            .filter(movie => !ratedMovieIds.has(movie.id))
-            .slice(0, 5)
-            .map(movie => this.convertTMDBToRecommendation(movie, genreId, genreScores));
-
-          recommendations.push(...genreRecommendations);
-        } catch (error) {
-          logger.error(`Error fetching recommendations for genre ${genreId}:`, error);
-        }
+      // If no movies match preferences, return empty array
+      if (candidateMovies.length === 0) {
+        return [];
       }
 
-      // If user has high-rated movies, also get similar movies
-      // Note: This feature requires movies to have tmdbId, which is not in the current schema
-      // Commenting out until schema is updated to include tmdbId field
-      // const highlyRatedMovies = userRatings.filter(r => r.rating >= averageUserRating && r.rating >= 7);
-      // if (highlyRatedMovies.length > 0 && recommendations.length < limit) {
-      //   for (const rating of highlyRatedMovies.slice(0, 2)) {
-      //     if (rating.movie.tmdbId) {
-      //       try {
-      //         const similarMovies = await this.getSimilarMovies(rating.movie.tmdbId);
-      //         const filtered = similarMovies
-      //           .filter(movie => !ratedMovieIds.has(movie.id))
-      //           .slice(0, 3)
-      //           .map(movie => ({
-      //             ...this.convertTMDBToRecommendation(movie, 0, genreScores),
-      //             recommendationReason: `Because you liked "${rating.movie.title}"`,
-      //           }));
-      //         recommendations.push(...filtered);
-      //       } catch (error) {
-      //         logger.error(`Error fetching similar movies for ${rating.movie.tmdbId}:`, error);
-      //       }
-      //     }
-      //   }
-      // }
+      // Convert to recommendation format and calculate scores
+      const recommendations: RecommendationMovie[] = candidateMovies.map(movie => {
+        // Calculate average user rating for this movie
+        const avgRating = movie.userRatings.length > 0
+          ? movie.userRatings.reduce((sum, r) => sum + r.rating, 0) / movie.userRatings.length
+          : movie.externalRatings[0]?.rating || 5;
 
-      // Score and rank recommendations
-      const scoredRecommendations = recommendations.map(movie => ({
-        ...movie,
-        recommendationScore: this.calculateRecommendationScore(movie, genreScores, averageUserRating),
-      }));
+        // Find matching genre
+        const matchingGenre = genreScores.find(gs =>
+          movie.genres.some(mg => mg.genreId === gs.genreId.toString())
+        );
 
-      // Remove duplicates and sort by score
-      const uniqueRecommendations = this.removeDuplicates(scoredRecommendations);
-      uniqueRecommendations.sort((a, b) => (b.recommendationScore || 0) - (a.recommendationScore || 0));
+        return {
+          id: movie.id,
+          tmdbId: movie.tmdbId || 0,
+          title: movie.title,
+          releaseYear: movie.releaseYear,
+          plot: movie.plot || '',
+          posterUrl: movie.posterUrl,
+          backdropUrl: null,
+          rating: avgRating,
+          voteCount: movie.userRatings.length,
+          source: 'tmdb' as const,
+          recommendationReason: matchingGenre
+            ? `Recommended based on your interest in ${matchingGenre.genreName}`
+            : 'Recommended for you',
+          recommendationScore: avgRating * (matchingGenre?.score || 0.5),
+        };
+      });
 
-      return uniqueRecommendations.slice(0, limit);
+      // Sort by recommendation score
+      recommendations.sort((a, b) => (b.recommendationScore || 0) - (a.recommendationScore || 0));
+
+      return recommendations.slice(0, limit);
     } catch (error) {
       logger.error('Error generating recommendations:', error);
       // Fallback to popular movies
@@ -165,107 +173,72 @@ export const recommendationService = {
     return genreScores.sort((a, b) => b.score - a.score);
   },
 
-  /**
-   * Get similar movies from TMDB
-   */
-  async getSimilarMovies(tmdbId: number): Promise<TMDBMovie[]> {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${tmdbId}/similar?api_key=${process.env.TMDB_API_KEY}`
-      );
-      const data = await response.json() as { results?: TMDBMovie[] };
-      return data.results || [];
-    } catch (error) {
-      logger.error('Error fetching similar movies:', error);
-      return [];
-    }
-  },
 
   /**
-   * Convert TMDB movie to recommendation format
-   */
-  convertTMDBToRecommendation(movie: TMDBMovie, genreId: number, genreScores: GenreScore[]): RecommendationMovie {
-    const genreInfo = genreScores.find(g => g.genreId === genreId);
-
-    return {
-      id: movie.id.toString(),
-      tmdbId: movie.id,
-      title: movie.title,
-      releaseYear: new Date(movie.release_date).getFullYear(),
-      plot: movie.overview,
-      posterUrl: tmdbService.getPosterUrl(movie.poster_path),
-      backdropUrl: tmdbService.getBackdropUrl(movie.backdrop_path),
-      rating: movie.vote_average,
-      voteCount: movie.vote_count,
-      source: 'tmdb' as const,
-      recommendationReason: genreInfo ? `Recommended based on your interest in ${genreInfo.genreName}` : undefined,
-    };
-  },
-
-  /**
-   * Calculate recommendation score based on multiple factors
-   */
-  calculateRecommendationScore(
-    movie: RecommendationMovie,
-    genreScores: GenreScore[],
-    averageUserRating: number
-  ): number {
-    let score = 0;
-
-    // Factor 1: TMDB rating (0-40 points)
-    score += (movie.rating / 10) * 40;
-
-    // Factor 2: Popularity based on vote count (0-20 points)
-    const voteScore = Math.min(movie.voteCount / 100, 20);
-    score += voteScore;
-
-    // Factor 3: Genre preference alignment (0-40 points)
-    // This would require genre_ids from TMDB response
-    // For now, we add a base score
-    score += 20;
-
-    return score;
-  },
-
-  /**
-   * Remove duplicate movies
-   */
-  removeDuplicates(movies: RecommendationMovie[]): RecommendationMovie[] {
-    const seen = new Set<number>();
-    const unique: RecommendationMovie[] = [];
-
-    for (const movie of movies) {
-      if (!seen.has(movie.tmdbId)) {
-        seen.add(movie.tmdbId);
-        unique.push(movie);
-      }
-    }
-
-    return unique;
-  },
-
-  /**
-   * Get popular movies as fallback recommendations
+   * Get popular movies from local database as fallback recommendations
    */
   async getPopularMoviesAsRecommendations(limit: number): Promise<RecommendationMovie[]> {
     try {
-      const tmdbResults = await tmdbService.getPopularMovies(1);
+      // Get movies from local database ordered by average rating and rating count
+      const movies = await prisma.movie.findMany({
+        include: {
+          userRatings: true,
+          externalRatings: true,
+        },
+        take: limit * 2, // Get more to filter and sort
+      });
 
-      return tmdbResults.results.slice(0, limit).map(movie => ({
-        id: movie.id.toString(),
-        tmdbId: movie.id,
+      // If no movies in database, return empty array
+      if (movies.length === 0) {
+        return [];
+      }
+
+      // Calculate average rating for each movie and sort
+      const moviesWithScores = movies.map(movie => {
+        const userRatings = movie.userRatings;
+        const avgUserRating = userRatings.length > 0
+          ? userRatings.reduce((sum, r) => sum + r.rating, 0) / userRatings.length
+          : 0;
+
+        // Use external ratings if available (IMDB or Rotten Tomatoes)
+        const externalRating = movie.externalRatings[0]?.rating || 0;
+
+        // Combined score: prioritize user ratings, fall back to external ratings
+        const score = userRatings.length > 0 ? avgUserRating : externalRating;
+        const ratingCount = userRatings.length;
+
+        return {
+          movie,
+          score,
+          ratingCount,
+        };
+      });
+
+      // Sort by score and rating count, then take the top results
+      const sortedMovies = moviesWithScores
+        .sort((a, b) => {
+          // First sort by score
+          if (b.score !== a.score) return b.score - a.score;
+          // Then by rating count
+          return b.ratingCount - a.ratingCount;
+        })
+        .slice(0, limit);
+
+      return sortedMovies.map(({ movie }) => ({
+        id: movie.id,
+        tmdbId: movie.tmdbId || 0,
         title: movie.title,
-        releaseYear: new Date(movie.release_date).getFullYear(),
-        plot: movie.overview,
-        posterUrl: tmdbService.getPosterUrl(movie.poster_path),
-        backdropUrl: tmdbService.getBackdropUrl(movie.backdrop_path),
-        rating: movie.vote_average,
-        voteCount: movie.vote_count,
-        source: 'tmdb' as const,
+        releaseYear: movie.releaseYear,
+        plot: movie.plot || '',
+        posterUrl: movie.posterUrl,
+        backdropUrl: null,
+        rating: 0,
+        voteCount: 0,
+        source: 'tmdb' as const, // Keep for compatibility, but it's from local DB
         recommendationReason: 'Popular movie you might enjoy',
       }));
     } catch (error) {
-      logger.error('Error fetching popular movies:', error);
+      logger.error('Error fetching popular movies from database:', error);
       return [];
     }
   },
