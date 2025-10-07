@@ -66,14 +66,14 @@ describe('AdminDashboard Component', () => {
       id: '1',
       email: 'user1@example.com',
       username: 'user1',
-      role: 'USER',
+      role: 'USER' as const,
       isBlocked: false,
     },
     {
       id: '2',
       email: 'user2@example.com',
       username: 'user2',
-      role: 'USER',
+      role: 'USER' as const,
       isBlocked: false,
     },
   ];
@@ -95,10 +95,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -119,10 +120,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -144,10 +146,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: mockUsers,
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -169,10 +172,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -196,10 +200,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: mockUsers,
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -223,10 +228,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -250,10 +256,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -275,10 +282,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -301,10 +309,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -327,10 +336,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: true,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -349,10 +359,11 @@ describe('AdminDashboard Component', () => {
     vi.mocked(hooks.useUsers).mockReturnValue({
       users: [],
       loading: false,
-      error: null,
+      error: '',
       blockUser: vi.fn(),
       unblockUser: vi.fn(),
       deleteUser: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(

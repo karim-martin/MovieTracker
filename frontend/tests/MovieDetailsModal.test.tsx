@@ -31,13 +31,25 @@ describe('MovieDetailsModal Component', () => {
       { id: '2', genre: { id: '2', name: 'Drama' } },
     ],
     credits: [
-      { id: '1', role: 'director', person: { id: '1', name: 'Director Name' }, characterName: null },
-      { id: '2', role: 'actor', person: { id: '2', name: 'Actor Name' }, characterName: 'Character Name' },
-      { id: '3', role: 'producer', person: { id: '3', name: 'Producer Name' }, characterName: null },
+      { id: '1', role: 'director', person: { id: '1', name: 'Director Name', type: 'DIRECTOR' }, characterName: undefined },
+      { id: '2', role: 'actor', person: { id: '2', name: 'Actor Name', type: 'ACTOR' }, characterName: 'Character Name' },
+      { id: '3', role: 'producer', person: { id: '3', name: 'Producer Name', type: 'PRODUCER' }, characterName: undefined },
     ],
     userRatings: [
-      { id: '1', rating: 8, user: { id: '1', username: 'user1' } },
-      { id: '2', rating: 9, user: { id: '2', username: 'user2' } },
+      {
+        id: '1',
+        rating: 8,
+        watchedDate: '2024-01-15',
+        user: { id: '1', username: 'user1', email: 'user1@test.com', role: 'USER' as const, isBlocked: false },
+        movie: { id: '1', title: 'Test Movie', releaseYear: 2023 }
+      },
+      {
+        id: '2',
+        rating: 9,
+        watchedDate: '2024-01-20',
+        user: { id: '2', username: 'user2', email: 'user2@test.com', role: 'USER' as const, isBlocked: false },
+        movie: { id: '1', title: 'Test Movie', releaseYear: 2023 }
+      },
     ],
     externalRatings: [
       { id: '1', source: 'TMDB', rating: 7.5, ratingCount: 1000 },

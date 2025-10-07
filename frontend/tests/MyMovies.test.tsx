@@ -25,6 +25,7 @@ describe('MyMovies Component', () => {
         plot: 'Test plot 1',
         posterUrl: 'https://example.com/poster1.jpg',
       },
+      user: { id: '1', username: 'testuser', email: 'test@example.com', role: 'USER' as const, isBlocked: false },
     },
     {
       id: '2',
@@ -37,6 +38,7 @@ describe('MyMovies Component', () => {
         plot: 'Test plot 2',
         posterUrl: 'https://example.com/poster2.jpg',
       },
+      user: { id: '1', username: 'testuser', email: 'test@example.com', role: 'USER' as const, isBlocked: false },
     },
   ];
 
@@ -44,7 +46,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: [],
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -60,7 +66,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: mockRatings,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -79,7 +89,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: mockRatings,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -98,7 +112,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: mockRatings,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -115,7 +133,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: mockRatings,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -136,7 +158,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: [],
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -153,7 +179,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: [],
       loading: true,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -169,7 +199,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: mockRatings,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(
@@ -189,7 +223,11 @@ describe('MyMovies Component', () => {
     vi.mocked(hooks.useRatings).mockReturnValue({
       ratings: [],
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
+      createRating: vi.fn(),
+      updateRating: vi.fn(),
+      deleteRating: vi.fn(),
     });
 
     render(

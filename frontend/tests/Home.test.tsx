@@ -70,12 +70,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: [],
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -102,12 +106,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: [],
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -137,12 +145,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: mockMovies,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -170,12 +182,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: mockMovies,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: mockRecommendations,
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -204,12 +220,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: mockMovies,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -225,7 +245,8 @@ describe('Home Component', () => {
     const mockUseMovies = vi.fn().mockReturnValue({
       movies: mockMovies,
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(AuthContext.useAuth).mockReturnValue({
@@ -244,6 +265,9 @@ describe('Home Component', () => {
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -278,12 +302,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: [],
       loading: false,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(
@@ -310,12 +338,16 @@ describe('Home Component', () => {
     vi.mocked(hooks.useMovies).mockReturnValue({
       movies: [],
       loading: true,
-      error: null,
+      error: '',
+      refetch: vi.fn(),
     });
 
     vi.mocked(hooks.useRecommendations).mockReturnValue({
       recommendations: [],
       loading: false,
+      error: '',
+      message: '',
+      refetch: vi.fn(),
     });
 
     render(

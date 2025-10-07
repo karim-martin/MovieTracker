@@ -39,4 +39,4 @@ const localStorageMock = {
 global.localStorage = localStorageMock as Storage;
 
 // Mock scrollTo
-global.scrollTo = vi.fn();
+global.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
