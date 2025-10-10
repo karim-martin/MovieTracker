@@ -42,9 +42,9 @@ export const recommendationService = {
         orderBy: { rating: 'desc' },
       });
 
-      // If user has no ratings, return popular movies
+      // If user has no ratings, return popular movies excluding watched ones
       if (userRatings.length === 0) {
-        return this.getPopularMoviesAsRecommendations(limit);
+        return this.getPopularMoviesAsRecommendations(limit, userId);
       }
 
       // Analyze user preferences
@@ -80,15 +80,26 @@ export const recommendationService = {
           genres: {
             include: { genre: true },
           },
-          userRatings: true,
+          userRatings: {
+            where: { userId },
+            select: {
+              id: true,
+              rating: true,
+              watchedDate: true,
+              updatedAt: true,
+            },
+          },
+          watchStatuses: {
+            where: { userId },
+          },
           externalRatings: true,
         },
         take: limit * 3, // Get more candidates to filter and rank
       });
 
-      // If no movies match preferences, return empty array
+      // If no movies match preferences, fall back to popular movies
       if (candidateMovies.length === 0) {
-        return [];
+        return this.getPopularMoviesAsRecommendations(limit, userId);
       }
 
       // Convert to recommendation format and calculate scores
@@ -169,10 +180,25 @@ export const recommendationService = {
   /**
    * Get popular movies from local database as fallback recommendations
    */
-  async getPopularMoviesAsRecommendations(limit: number): Promise<RecommendationMovie[]> {
+  async getPopularMoviesAsRecommendations(limit: number, userId?: string): Promise<RecommendationMovie[]> {
     try {
+      // Get movie IDs user has already rated to exclude them
+      let ratedMovieIds: string[] = [];
+      if (userId) {
+        const userRatings = await prisma.userRating.findMany({
+          where: { userId },
+          select: { movieId: true },
+        });
+        ratedMovieIds = userRatings.map(r => r.movieId);
+      }
+
       // Get movies from local database ordered by average rating and rating count
       const movies = await prisma.movie.findMany({
+        where: userId && ratedMovieIds.length > 0 ? {
+          id: {
+            notIn: ratedMovieIds,
+          },
+        } : undefined,
         include: {
           userRatings: true,
           externalRatings: true,

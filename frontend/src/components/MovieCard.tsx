@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { Card, Badge, Button } from 'react-bootstrap';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaStar } from 'react-icons/fa';
 import { Movie, MovieGenre, ExternalRating } from '../types';
-import { watchStatusAPI } from '../services/api';
-import { useAuth } from '../services/AuthContext';
 
 interface MovieCardProps {
   movie: Movie;
@@ -11,34 +8,50 @@ interface MovieCardProps {
   onWatchStatusChange?: () => void;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails, onWatchStatusChange }) => {
-  const { isAuthenticated } = useAuth();
-  const [isWatched, setIsWatched] = useState(movie.watchStatus?.watched ?? false);
-  const [isLoading, setIsLoading] = useState(false);
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails }) => {
+  const isWatched = movie.watchStatus?.watched ?? false;
+  const hasRating = movie.userRating !== undefined && movie.userRating !== null;
+  const userRatingValue = hasRating ? movie.userRating?.rating : null;
 
-  const handleWatchToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAuthenticated || isLoading) return;
+  // Determine button variant and text based on status
+  const getButtonVariant = () => {
+    if (hasRating) return 'success';
+    if (isWatched) return 'primary';
+    return 'dark';
+  };
 
-    setIsLoading(true);
-    try {
-      await watchStatusAPI.toggleWatchStatus(movie.id, {
-        watched: !isWatched,
-        watchedDate: !isWatched ? new Date().toISOString() : undefined
-      });
-      setIsWatched(!isWatched);
-      onWatchStatusChange?.();
-    } catch (error) {
-      console.error('Failed to toggle watch status:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const getButtonText = () => {
+    if (hasRating) return 'Rated';
+    if (isWatched) return 'Watched';
+    return 'View Details';
   };
 
   return (
-    <Card>
+    <Card className={hasRating || isWatched ? 'border-success' : ''} style={hasRating || isWatched ? { borderWidth: '2px' } : {}}>
       {movie.posterUrl && (
-        <Card.Img variant="top" src={movie.posterUrl} style={{ height: '300px', objectFit: 'cover' }} alt={movie.title}/>
+        <div style={{ position: 'relative' }}>
+          <Card.Img variant="top" src={movie.posterUrl} style={{ height: '300px', objectFit: 'cover' }} alt={movie.title}/>
+          {(isWatched || hasRating) && (
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              display: 'flex',
+              gap: '4px'
+            }}>
+              {isWatched && (
+                <Badge bg="success" className="d-flex align-items-center gap-1">
+                  <FaEye /> Watched
+                </Badge>
+              )}
+              {hasRating && userRatingValue && (
+                <Badge bg="warning" text="dark" className="d-flex align-items-center gap-1">
+                  <FaStar /> {userRatingValue}/10
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
       )}
       <Card.Body>
         <Card.Title style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: '3rem'}}>
@@ -59,21 +72,16 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onViewDetails, onWa
             </Badge>
           </div>
         ))}
-        <div className="d-flex gap-2 mt-2">
-          {isAuthenticated && (
-            <Button
-              variant={isWatched ? 'success' : 'outline-secondary'}
-              size="sm"
-              onClick={handleWatchToggle}
-              disabled={isLoading}
-              className="d-flex align-items-center gap-1"
-            >
-              {isWatched ? <FaEye /> : <FaEyeSlash />}
-              {isWatched ? 'Watched' : 'Watch'}
-            </Button>
-          )}
-          <Button variant="dark" size="sm" onClick={() => onViewDetails?.(movie.id)} className="flex-grow-1">
-            View Details
+        <div className="mt-2">
+          <Button
+            variant={getButtonVariant()}
+            size="sm"
+            onClick={() => onViewDetails?.(movie.id)}
+            className="w-100 d-flex align-items-center justify-content-center gap-1"
+          >
+            {hasRating && <FaStar />}
+            {!hasRating && isWatched && <FaEye />}
+            {getButtonText()}
           </Button>
         </div>
       </Card.Body>

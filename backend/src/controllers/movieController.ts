@@ -72,7 +72,15 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Res
           genres: { include: { genre: true } },
           credits: { include: { person: true } },
           externalRatings: true,
-          userRatings: {
+          userRatings: userId ? {
+            where: { userId },
+            select: {
+              id: true,
+              rating: true,
+              watchedDate: true,
+              updatedAt: true,
+            },
+          } : {
             select: {
               rating: true,
             },
@@ -88,11 +96,12 @@ export const getAllMovies = async (req: AuthRequest, res: Response): Promise<Res
       prisma.movie.count({ where }),
     ]);
 
-    // Transform movies to include single watchStatus instead of array
+    // Transform movies to include single watchStatus and userRating instead of arrays
     const transformedMovies = movies.map(movie => ({
       ...movie,
       watchStatus: Array.isArray(movie.watchStatuses) && movie.watchStatuses.length > 0 ? movie.watchStatuses[0] : undefined,
       watchStatuses: undefined,
+      userRating: Array.isArray(movie.userRatings) && movie.userRatings.length > 0 ? movie.userRatings[0] : undefined,
     }));
 
     res.status(200).json({
@@ -231,11 +240,52 @@ export const getRecommendations = async (req: AuthRequest, res: Response): Promi
 
     const { limit = '10' } = req.query;
     const limitNum = parseInt(limit as string);
-    const recommendations = await recommendationService.getRecommendations( req.user.userId, limitNum );
+    const userId = req.user.userId;
+
+    // Get recommendations with full movie details
+    const recommendationIds = await recommendationService.getRecommendations(userId, limitNum);
+
+    // Fetch full movie details for recommendations including user's watch status and rating
+    const recommendations = await Promise.all(
+      recommendationIds.map(async (rec) => {
+        const movie = await prisma.movie.findUnique({
+          where: { id: rec.id },
+          include: {
+            genres: { include: { genre: true } },
+            credits: { include: { person: true } },
+            externalRatings: true,
+            userRatings: {
+              where: { userId },
+              select: {
+                id: true,
+                rating: true,
+                watchedDate: true,
+                updatedAt: true,
+              },
+            },
+            watchStatuses: {
+              where: { userId },
+            },
+          },
+        });
+
+        if (!movie) return null;
+
+        return {
+          ...movie,
+          watchStatus: Array.isArray(movie.watchStatuses) && movie.watchStatuses.length > 0 ? movie.watchStatuses[0] : undefined,
+          watchStatuses: undefined,
+          userRating: Array.isArray(movie.userRatings) && movie.userRatings.length > 0 ? movie.userRatings[0] : undefined,
+        };
+      })
+    );
+
+    // Filter out any null values
+    const validRecommendations = recommendations.filter(r => r !== null);
 
     res.status(200).json({
-      recommendations,
-      message: recommendations.length > 0
+      recommendations: validRecommendations,
+      message: validRecommendations.length > 0
         ? 'Recommendations generated based on your viewing history'
         : 'No recommendations available yet. Start rating movies!',
     });
