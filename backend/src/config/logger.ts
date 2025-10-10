@@ -5,7 +5,7 @@ import path from 'path';
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 const LOG_FILE_PATH = process.env.LOG_FILE_PATH || 'logs/app.log';
 const LOG_ERROR_FILE_PATH = process.env.LOG_ERROR_FILE_PATH || 'logs/error.log';
-const LOG_ENABLE_FILE = process.env.LOG_ENABLE_FILE !== 'false'; // Default true
+const LOG_ENABLE_FILE = process.env.LOG_ENABLE_FILE === 'true'; // Default false (console only)
 const LOG_ENABLE_CONSOLE = process.env.LOG_ENABLE_CONSOLE !== 'false'; // Default true
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
