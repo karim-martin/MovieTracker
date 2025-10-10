@@ -3,6 +3,7 @@ import {
   toggleWatchStatus,
   getWatchStatus,
   getMyWatchedMovies,
+  getMyMovies,
   deleteWatchStatus,
 } from '../controllers/watchStatusController';
 import { auth } from '../middlewares/auth';
@@ -12,6 +13,9 @@ const router = Router();
 
 // All routes require authentication and non-blocked status
 router.use(auth, checkBlocked);
+
+// Get all movies for current user (rated OR watched)
+router.get('/my-movies', getMyMovies);
 
 // Get all watched movies for current user
 router.get('/my', getMyWatchedMovies);

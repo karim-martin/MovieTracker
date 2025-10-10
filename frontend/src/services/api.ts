@@ -105,6 +105,8 @@ export const watchStatusAPI = {
     api.get(`/watch-status/${movieId}`),
   getMyWatchedMovies: (): Promise<AxiosResponse<MoviesResponse>> =>
     api.get('/watch-status/my'),
+  getMyMovies: (): Promise<AxiosResponse<MoviesResponse>> =>
+    api.get('/watch-status/my-movies'),
   deleteWatchStatus: (movieId: string): Promise<AxiosResponse> =>
     api.delete(`/watch-status/${movieId}`),
 };

@@ -143,6 +143,124 @@ export const getMyWatchedMovies = async (req: AuthRequest, res: Response): Promi
   }
 };
 
+// Get all movies for current user (rated OR watched)
+export const getMyMovies = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Get all movies that user has either rated or watched
+    const [watchStatuses, ratings] = await Promise.all([
+      prisma.watchStatus.findMany({
+        where: {
+          userId,
+          watched: true,
+        },
+        include: {
+          movie: {
+            include: {
+              genres: {
+                include: {
+                  genre: true,
+                },
+              },
+              credits: {
+                include: {
+                  person: true,
+                },
+              },
+              externalRatings: true,
+            },
+          },
+        },
+      }),
+      prisma.userRating.findMany({
+        where: {
+          userId,
+        },
+        include: {
+          movie: {
+            include: {
+              genres: {
+                include: {
+                  genre: true,
+                },
+              },
+              credits: {
+                include: {
+                  person: true,
+                },
+              },
+              externalRatings: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    // Create a map to combine movies with their watch status, rating, and most recent date
+    const movieMap = new Map();
+
+    // Add watched movies
+    watchStatuses.forEach(ws => {
+      movieMap.set(ws.movieId, {
+        ...ws.movie,
+        watchStatus: {
+          watched: ws.watched,
+          watchedDate: ws.watchedDate,
+          updatedAt: ws.updatedAt,
+        },
+        userRating: undefined,
+        lastActionDate: ws.updatedAt,
+      });
+    });
+
+    // Add or update with rated movies
+    ratings.forEach(rating => {
+      const existing = movieMap.get(rating.movieId);
+      const ratingData = {
+        id: rating.id,
+        rating: rating.rating,
+        watchedDate: rating.watchedDate,
+        updatedAt: rating.updatedAt,
+      };
+
+      if (existing) {
+        // Movie is both watched and rated - use most recent date
+        const ratingDate = new Date(rating.updatedAt);
+        const watchDate = new Date(existing.lastActionDate);
+        movieMap.set(rating.movieId, {
+          ...existing,
+          userRating: ratingData,
+          lastActionDate: ratingDate > watchDate ? rating.updatedAt : existing.lastActionDate,
+        });
+      } else {
+        // Movie is only rated
+        movieMap.set(rating.movieId, {
+          ...rating.movie,
+          watchStatus: undefined,
+          userRating: ratingData,
+          lastActionDate: rating.updatedAt,
+        });
+      }
+    });
+
+    // Convert map to array and sort by most recent action
+    const movies = Array.from(movieMap.values()).sort((a, b) => {
+      return new Date(b.lastActionDate).getTime() - new Date(a.lastActionDate).getTime();
+    });
+
+    res.status(200).json({ movies });
+  } catch (error) {
+    console.error('Error getting my movies:', error);
+    res.status(500).json({ error: 'Failed to get my movies' });
+  }
+};
+
 // Delete watch status
 export const deleteWatchStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {

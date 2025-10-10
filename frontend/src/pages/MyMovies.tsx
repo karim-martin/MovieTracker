@@ -1,17 +1,17 @@
 import { Card, Table, Badge, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { useRatings } from '../hooks';
+import { useMyMovies } from '../hooks';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { MessageModal } from '../components/MessageModal';
 
 export default function MyMovies() {
-  const { ratings, loading, error } = useRatings();
+  const { movies, loading, error } = useMyMovies();
 
   if (loading) return <LoadingSpinner />;
 
   return (
     <div>
-      <h1 className="mb-4">My Watched Movies</h1>
+      <h1 className="mb-4">My Movies</h1>
 
       {error && (
         <MessageModal
@@ -23,9 +23,9 @@ export default function MyMovies() {
         />
       )}
 
-      {ratings.length === 0 ? (
+      {movies.length === 0 ? (
         <Alert variant="info">
-          You haven't rated any movies yet. <Link to="/">Browse movies</Link> to get started!
+          You haven't watched or rated any movies yet. <Link to="/">Browse movies</Link> to get started!
         </Alert>
       ) : (
         <Card>
@@ -36,20 +36,24 @@ export default function MyMovies() {
                   <th>Movie</th>
                   <th>Year</th>
                   <th>My Rating</th>
-                  <th>Watched Date</th>
+                  <th>Last Action Date</th>
                 </tr>
               </thead>
               <tbody>
-                {ratings.map((rating) => (
-                  <tr key={rating.id}>
+                {movies.map((movie) => (
+                  <tr key={movie.id}>
                     <td>
-                      <Link to={`/movies/${rating.movie.id}`}>{rating.movie.title}</Link>
+                      <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
                     </td>
-                    <td>{rating.movie.releaseYear}</td>
+                    <td>{movie.releaseYear}</td>
                     <td>
-                      <Badge bg="primary">{rating.rating}/10</Badge>
+                      {movie.userRating ? (
+                        <Badge bg="primary">{movie.userRating.rating}/10</Badge>
+                      ) : (
+                        <Badge bg="secondary">Not Rated</Badge>
+                      )}
                     </td>
-                    <td>{new Date(rating.watchedDate).toLocaleDateString()}</td>
+                    <td>{new Date(movie.lastActionDate || '').toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>

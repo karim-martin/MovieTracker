@@ -24,6 +24,13 @@ export interface Movie {
   credits?: Credit[];
   userRatings?: UserRating[];
   watchStatus?: WatchStatus;
+  userRating?: {
+    id: string;
+    rating: number;
+    watchedDate: string;
+    updatedAt: string;
+  };
+  lastActionDate?: string;
 }
 
 export interface Genre {

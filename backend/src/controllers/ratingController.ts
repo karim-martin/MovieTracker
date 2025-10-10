@@ -122,9 +122,22 @@ export const updateRating = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    const updatedRating = await prisma.userRating.update({ where: { id }, 
-      data: { ...(rating && { rating: parseFloat(rating) }), ...(watchedDate && { watchedDate: new Date(watchedDate) }) }, 
+    const updatedRating = await prisma.userRating.update({ where: { id },
+      data: { ...(rating && { rating: parseFloat(rating) }), ...(watchedDate && { watchedDate: new Date(watchedDate) }) },
       include: { movie: true, }});
+
+    // Update watch status date to match rating update if watchedDate was updated
+    if (watchedDate) {
+      await prisma.watchStatus.updateMany({
+        where: {
+          movieId: existingRating.movieId,
+          userId: req.user.userId,
+        },
+        data: {
+          watchedDate: new Date(watchedDate),
+        },
+      });
+    }
 
     res.status(200).json({ message: 'Rating updated successfully', rating: updatedRating });
   } catch (error) {
