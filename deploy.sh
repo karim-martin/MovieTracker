@@ -46,13 +46,6 @@ echo ""
 
 cd backend
 
-# Check for .env file
-if [ ! -f ".env" ]; then
-    print_error "Backend .env file not found!"
-    print_info "Copy .env.example to .env and configure it for local testing"
-    exit 1
-fi
-
 # Install dependencies
 print_info "Installing backend dependencies..."
 npm ci --quiet
@@ -98,14 +91,7 @@ echo ""
 
 cd frontend
 
-# Check for .env file
-if [ ! -f ".env" ]; then
-    print_error "Frontend .env file not found!"
-    print_info "Copy .env.example to .env and configure VITE_API_URL"
-    exit 1
-fi
-
-# Get current API URL
+# Get current API URL (if .env exists)
 CURRENT_API_URL=$(grep VITE_API_URL .env | cut -d '=' -f2 | tr -d '"' | tr -d "'")
 print_info "Current VITE_API_URL: $CURRENT_API_URL"
 
