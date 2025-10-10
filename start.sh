@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Start both frontend and backend applications for MovieTracker
-
 echo "Starting MovieTracker applications..."
 
 # Function to cleanup background processes on exit
