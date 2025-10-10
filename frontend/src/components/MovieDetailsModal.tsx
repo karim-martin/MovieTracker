@@ -5,12 +5,18 @@ import { useAuth } from '../services/AuthContext';
 import { ratingAPI } from '../services/api';
 import { Movie, Credit, MovieGenre, ExternalRating, UserRating } from '../types';
 
-interface MovieDetailsModalProps { show: boolean; movie: Movie | null; onClose: () => void; }
+interface MovieDetailsModalProps {
+  show: boolean;
+  movie: Movie | null;
+  onClose: () => void;
+  onRatingSuccess?: () => void;
+}
 
 export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
   show,
   movie,
   onClose,
+  onRatingSuccess,
 }) => {
   const { isAuthenticated } = useAuth();
 
@@ -53,6 +59,8 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
       setRating(0);
       setHoveredStar(0);
       setWatchedDate('');
+      // Trigger refetch of movies to update watch status
+      onRatingSuccess?.();
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
       setErrorModal({ show: true, message: error.response?.data?.error || 'Failed to submit rating' });

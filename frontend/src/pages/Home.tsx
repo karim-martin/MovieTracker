@@ -16,8 +16,8 @@ export default function Home() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const { isAuthenticated } = useAuth();
-  const { movies, loading, error } = useMovies(searchParams);
-  const { recommendations, loading: recsLoading } = useRecommendations(10, !isAuthenticated);
+  const { movies, loading, error, refetch } = useMovies(searchParams);
+  const { recommendations, loading: recsLoading, refetch: refetchRecommendations } = useRecommendations(10, !isAuthenticated);
 
   const handleViewDetails = (movieId: string) => {
     const movie = [...movies, ...recommendations].find(m => m.id === movieId);
@@ -33,6 +33,11 @@ export default function Home() {
     if (searchGenre) params.genre = searchGenre;
     if (searchPerson) params.person = searchPerson;
     setSearchParams(params);
+  };
+
+  const handleRatingSuccess = async () => {
+    await refetch();
+    await refetchRecommendations();
   };
 
   if (loading) return <LoadingSpinner />;
@@ -110,7 +115,7 @@ export default function Home() {
             <div style={{ display: 'inline-flex', gap: '1rem' }}>
               {recommendations.map((movie) => (
                 <div key={movie.id} style={{ width: '280px', display: 'inline-block' }}>
-                  <MovieCard movie={movie} onViewDetails={handleViewDetails} />
+                  <MovieCard movie={movie} onViewDetails={handleViewDetails} onWatchStatusChange={refetch} />
                 </div>
               ))}
             </div>
@@ -128,7 +133,7 @@ export default function Home() {
         ) : (
           movies.map((movie) => (
             <Col md={3} key={movie.id} className="mb-4">
-              <MovieCard movie={movie} onViewDetails={handleViewDetails} />
+              <MovieCard movie={movie} onViewDetails={handleViewDetails} onWatchStatusChange={refetch} />
             </Col>
           ))
         )}
@@ -138,6 +143,7 @@ export default function Home() {
         show={selectedMovie !== null}
         movie={selectedMovie}
         onClose={() => setSelectedMovie(null)}
+        onRatingSuccess={handleRatingSuccess}
       />
     </div>
   );
