@@ -300,10 +300,6 @@ npm run test:coverage
 - `AdminRoute.test.tsx` (215 lines) - Admin-only route protection
 - `ErrorBoundary.test.tsx` (149 lines) - Error handling component
 
-**Total Frontend Test Lines:** 2,239 lines
-
-**Combined Test Coverage:** 5,375+ lines of test code
-
 ---
 
 ## 🗄️ Database Migration
