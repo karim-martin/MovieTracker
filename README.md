@@ -259,17 +259,6 @@ npm run test:watch
 npm run test -- --coverage
 ```
 
-**Backend Test Coverage:**
-- `auth.test.ts` (340 lines) - Authentication endpoints and validation
-- `authService.test.ts` (334 lines) - Authentication service logic
-- `database.test.ts` (744 lines) - Database integrity and query tests
-- `middleware.test.ts` (452 lines) - Authentication and validation middleware
-- `movies.test.ts` (345 lines) - Movie endpoints and operations
-- `recommendationService.test.ts` (464 lines) - AI recommendation algorithm
-- `validation.test.ts` (457 lines) - Input validation edge cases
-
-**Total Backend Test Lines:** 3,136 lines
-
 ### Frontend Tests
 
 ```bash
